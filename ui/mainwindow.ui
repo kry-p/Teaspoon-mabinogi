@@ -181,6 +181,9 @@
    </property>
   </action>
   <action name="actionRatio">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>비율 창 보기</string>
    </property>
