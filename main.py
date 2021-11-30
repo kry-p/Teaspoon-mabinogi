@@ -3,12 +3,12 @@ import os
 from pathlib import Path
 import sys
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import QFile, QCoreApplication, Qt
 from PySide6.QtUiTools import QUiLoader
 
-from ui.mainwindow import Ui_MainWindow
-from ui.ratio import Ui_Dialog
+from ui.dialogs import Ui_MainWindow
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
