@@ -18,7 +18,7 @@ color = ['#FFFF00', '#FF0000', '#FFFF00']
 rangeFont = QFont('Arial', 1)
 
 
-class RatioDialog(QWidget):
+class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
         self.currentWindowSize = {
@@ -30,7 +30,6 @@ class RatioDialog(QWidget):
         self.initUI()
 
     # 새로운 값을 계산 후 반영
-
     def calculate(self):
         list = []
         sum = 0
@@ -53,11 +52,11 @@ class RatioDialog(QWidget):
             temp += list[i]
 
     # 저장된 값을 업데이트
-
     def update(self, newValue):
         self.ratio = newValue
         self.calculate()
 
+    # UI 요소 초기화
     def initUI(self):
         self.resize(self.currentWindowSize['width'],
                     self.currentWindowSize['height'])
@@ -75,32 +74,46 @@ class RatioDialog(QWidget):
         self.calculate()
         self.show()
 
+    # 마우스 클릭 이벤트
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.m_flag = True
+            self.m_Position = event.globalPos() - self.pos()
+            event.accept()
+            self.setCursor(QCursor(Qt.OpenHandCursor))  # Change mouse icon
 
-class Ui_MainWindow(object):
-    # setupUi
-    def setupUi(self, MainWindow):
-        # default value
+    def mouseMoveEvent(self, QMouseEvent):
+        if Qt.LeftButton and self.m_flag:
+            self.move(QMouseEvent.globalPos()-self.m_Position)
+            QMouseEvent.accept()
+
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.m_flag = False
+        self.setCursor(QCursor(Qt.ArrowCursor))
+
+
+class Ui_MainWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__()
+
         self._ratioDialog = None
+        self.resize(260, 190)
+        self.setFixedSize(260, 190)
 
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"Spoon")
-        self.window = MainWindow
-        self.window.resize(260, 190)
-        self.window.setFixedSize(260, 190)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
-            self.window.sizePolicy().hasHeightForWidth())
-        self.window.setSizePolicy(sizePolicy)
+            self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
 
-        self.actionSettings = QAction(self.window)
+        self.actionSettings = QAction(self)
         self.actionSettings.setObjectName(u"actionSettings")
-        self.actionExit = QAction(self.window)
+        self.actionExit = QAction(self)
         self.actionExit.setObjectName(u"actionExit")
-        self.actionRatio = QAction(self.window)
+        self.actionRatio = QAction(self)
         self.actionRatio.setObjectName(u"actionRatio")
-        self.centralwidget = QWidget(self.window)
+        self.centralwidget = QWidget(self)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy.setHeightForWidth(
             self.centralwidget.sizePolicy().hasHeightForWidth())
@@ -148,13 +161,13 @@ class Ui_MainWindow(object):
         self.opacitySlider.setSliderPosition(70)
         self.opacitySlider.setOrientation(Qt.Horizontal)
 
-        self.window.setCentralWidget(self.centralwidget)
-        self.menubar = QMenuBar(self.window)
+        self.setCentralWidget(self.centralwidget)
+        self.menubar = QMenuBar(self)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 260, 24))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
-        self.window.setMenuBar(self.menubar)
+        self.setMenuBar(self.menubar)
 
         self.menubar.addAction(self.menu.menuAction())
         self.menu.addAction(self.actionRatio)
@@ -164,7 +177,9 @@ class Ui_MainWindow(object):
 
         self.retranslateUi()
 
-        QMetaObject.connectSlotsByName(self.window)
+        QMetaObject.connectSlotsByName(self)
+
+        self.m_flag = False
 
         # Actions
         self.opacitySlider.valueChanged.connect(self.onOpacityChanged)
@@ -189,7 +204,7 @@ class Ui_MainWindow(object):
 
     # retranslateUi
     def retranslateUi(self):
-        self.window.setWindowTitle(
+        self.setWindowTitle(
             QCoreApplication.translate("Spoon", u"Spoon", None))
         self.actionSettings.setText(
             QCoreApplication.translate("Spoon", u"\uc124\uc815", None))
