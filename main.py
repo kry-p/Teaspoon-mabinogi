@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import QFile, QCoreApplication, Qt
 from PySide6.QtUiTools import QUiLoader
 
-from ui.dialogs import Ui_MainWindow
+from ui.mainwindow import Ui_MainWindow
 
 
 if __name__ == "__main__":
