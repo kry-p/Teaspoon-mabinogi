@@ -252,5 +252,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# etc.
 .vscode
+.qt_for_python
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,qt,python

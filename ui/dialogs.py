@@ -82,12 +82,12 @@ class RatioDialog(QMainWindow):
             event.accept()
             self.setCursor(QCursor(Qt.OpenHandCursor))  # Change mouse icon
 
-    def mouseMoveEvent(self, QMouseEvent):
+    def mouseMoveEvent(self, event):
         if Qt.LeftButton and self.m_flag:
-            self.move(QMouseEvent.globalPos()-self.m_Position)
-            QMouseEvent.accept()
+            self.move(event.globalPos() - self.m_Position)
+            event.accept()
 
-    def mouseReleaseEvent(self, QMouseEvent):
+    def mouseReleaseEvent(self, event):
         self.m_flag = False
         self.setCursor(QCursor(Qt.ArrowCursor))
 
