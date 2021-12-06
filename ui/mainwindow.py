@@ -5,7 +5,7 @@ from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
                             QSettings)
 from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
                            QCursor, QFont, QFontDatabase, QGradient,
-                           QIcon, QImage, QKeySequence, QLinearGradient,
+                           QIcon, QImage, QIntValidator, QKeySequence, QLinearGradient,
                            QPainter, QPalette, QPixmap, QRadialGradient,
                            QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QLabel,
@@ -47,6 +47,8 @@ rangeFont = QFont('Arial', 1)
 settings = QSettings('Yuzu', 'Spoon')
 
 # 비율 바 창
+
+rangeFont = QFont('Arial', 1)
 
 
 class RatioDialog(QMainWindow):
@@ -241,8 +243,9 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi()
         self.selectorWidget.setCurrentIndex(0)
 
-        for item in recipeData['categories']:
-            self.rankComboBox.addItem(item)
+        # for item in recipeData['categories']:
+        #     self.rankComboBox.addItem(item)
+        self.rankComboBox.addItem("준비중인 기능입니다.")
 
         # Actions
         self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
@@ -430,44 +433,26 @@ class Ui_MainWindow(QMainWindow):
 
         # 비율 섹션
         # 재료 라벨
-        self.stuffLabel0.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffLabel0.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc1</span></p></body></html>', None))
-        self.stuffLabel1.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffLabel1.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc2</span></p></body></html>', None))
-        self.stuffLabel2.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffLabel2.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc3</span></p></body></html>', None))
 
         # 재료 이름 라벨
-        self.stuffName0.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffName0.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p>recipe_C:C</p></body></html>', None))
-        self.stuffName1.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffName1.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p>recipe_D:D</p></body></html>', None))
-        self.stuffName2.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.stuffName2.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p>recipe_E:E</p></body></html>', None))
 
         # % 기호 라벨
-        self.percentLabel0.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.percentLabel0.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' color:#aaaaaa;\'>%</span></p></body></html>', None))
-        self.percentLabel1.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.percentLabel1.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' color:#aaaaaa;\'>%</span></p></body></html>', None))
-        self.percentLabel2.setToolTip(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><br/></p></body></html>', None))
         self.percentLabel2.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' color:#aaaaaa;\'>%</span></p></body></html>', None))
 
@@ -681,11 +666,15 @@ class Ui_Settings(QMainWindow):
         self.opacitySlider.setSliderPosition(
             settings.value('ratioDialogOpacity'))
         if settings.value('initialWindowExpanded') is True:
-            self.mainWindowRadio0.setChecked(False)
             self.mainWindowRadio1.setChecked(True)
         else:
             self.mainWindowRadio0.setChecked(True)
-            self.mainWindowRadio1.setChecked(False)
+
+        # 입력값 검증
+        self.ratioBarWidthInput.setValidator(QIntValidator(1, 3840))
+        self.ratioBarHeightInput.setValidator(QIntValidator(1, 2160))
+        self.ratioBarXPosInput.setValidator(QIntValidator(1, 3840))
+        self.ratioBarYPosInput.setValidator(QIntValidator(1, 2160))
 
         # 액션 지정
         self.mainWindowRadio0.clicked.connect(self.onRadioButtonClicked)
@@ -752,20 +741,17 @@ class Ui_Settings(QMainWindow):
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\ud06c\uae30</span></p></body></html>", None))
         self.positionLabel.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc704\uce58</span></p></body></html>", None))
-        self.ratioBarWidthInput.setText(
-            QCoreApplication.translate("MainWindow", u"245", None))
-        self.ratioBarHeightInput.setText(
-            QCoreApplication.translate("MainWindow", u"10", None))
-        self.ratioBarXPosInput.setText(
-            QCoreApplication.translate("MainWindow", u"358", None))
-        self.ratioBarYPosInput.setText(
-            QCoreApplication.translate("MainWindow", u"690", None))
+
+        
+        self.ratioBarWidthInput.setText(settings.value('ratioDialogSize')['width'])
+        self.ratioBarHeightInput.setText(settings.value('ratioDialogSize')['height'])
+        self.ratioBarXPosInput.setText(settings.value('ratioDialogDefaultPosition')['x'])
+        self.ratioBarYPosInput.setText(settings.value('ratioDialogDefaultPosition')['y'])
         self.opacityLabel.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\ud22c\uba85\ub3c4</span></p></body></html>", None))
-        self.ratioColorInput0.setText(
-            QCoreApplication.translate("MainWindow", u"#ffff00", None))
-        self.ratioColorInput1.setText(
-            QCoreApplication.translate("MainWindow", u"#ff0000", None))
+        self.ratioColorInput0.setText(settings.value('ratioBarColor')[0])
+        self.ratioColorInput1.setText(settings.value('ratioBarColor')[1])
+   
         self.ratioColorLabel1.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc0c9\uc0c1 B</span></p></body></html>", None))
         self.ratioColorLabel0.setText(QCoreApplication.translate(
