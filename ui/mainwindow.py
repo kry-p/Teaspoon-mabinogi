@@ -47,10 +47,6 @@ rangeFont = QFont('Arial', 1)
 settings = QSettings('Yuzu', 'Spoon')
 
 # 비율 바 창
-
-rangeFont = QFont('Arial', 1)
-
-
 class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
@@ -613,12 +609,17 @@ class Ui_Settings(QMainWindow):
         self.ratioColorLabel0.setGeometry(QRect(50, 80, 41, 20))
         self.ratioColorInput0 = QLineEdit(self.barOption)
         self.ratioColorInput0.setGeometry(QRect(100, 80, 61, 20))
-
+        self.colorSelectButton0 = QPushButton(self.barOption)
+        self.colorSelectButton0.setGeometry(QRect(170, 75, 61, 30))
+        
         # 색상 B
         self.ratioColorLabel1 = QLabel(self.barOption)
         self.ratioColorLabel1.setGeometry(QRect(50, 110, 41, 20))
         self.ratioColorInput1 = QLineEdit(self.barOption)
         self.ratioColorInput1.setGeometry(QRect(100, 110, 61, 20))
+        self.colorSelectButton1 = QPushButton(self.barOption)
+        self.colorSelectButton1.setGeometry(QRect(170, 105, 61, 30))
+        
 
         # 투명도
         self.opacityLabel = QLabel(self.barOption)
@@ -699,6 +700,9 @@ class Ui_Settings(QMainWindow):
         self.ratioColorInput0.textChanged.connect(self.onColor0Changed)
         self.ratioColorInput1.textChanged.connect(self.onColor1Changed)
 
+        self.colorSelectButton0.clicked.connect(self.onColorPicker0Opened)
+        self.colorSelectButton1.clicked.connect(self.onColorPicker1Opened)
+
         self.resetFavButton.clicked.connect(self.onResetFavorites)
 
     def onRadioButtonClicked(self):
@@ -761,6 +765,14 @@ class Ui_Settings(QMainWindow):
     def onResetFavorites(self):
         settings.setValue('favorites', [])
 
+    def onColorPicker0Opened(self):
+        pick = QColorDialog.getColor()
+        self.ratioColorInput0.setText(pick.name())
+    
+    def onColorPicker1Opened(self):
+        pick = QColorDialog.getColor()
+        self.ratioColorInput1.setText(pick.name())
+        
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate(
             "MainWindow", u"\uc124\uc815", None))
@@ -778,6 +790,8 @@ class Ui_Settings(QMainWindow):
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\ud22c\uba85\ub3c4</span></p></body></html>", None))
         self.ratioColorInput0.setText(settings.value('ratioBarColor')[0])
         self.ratioColorInput1.setText(settings.value('ratioBarColor')[1])
+        self.colorSelectButton0.setText('선택')
+        self.colorSelectButton1.setText('선택')
    
         self.ratioColorLabel1.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc0c9\uc0c1 B</span></p></body></html>", None))

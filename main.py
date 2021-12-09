@@ -1,12 +1,9 @@
 # This Python file uses the following encoding: utf-8
-import os
-from pathlib import Path
 import sys
 
-from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import QFile, QCoreApplication, Qt
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtUiTools import QUiLoader
 
 from ui.mainwindow import Ui_MainWindow
 
