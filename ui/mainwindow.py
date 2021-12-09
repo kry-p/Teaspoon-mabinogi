@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QLabel,
                                QLineEdit, QListView, QMainWindow, QMenu,
                                QMenuBar, QPushButton, QRadioButton, QSizePolicy,
                                QTabWidget, QTextEdit, QWidget, QMessageBox,
-                               QSlider)
+                               QSlider, QColorDialog)
 
 defaultSettings = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
@@ -56,9 +56,12 @@ class RatioDialog(QMainWindow):
         super().__init__()
         self.currentWindowSize = {
             'width': settings.value('ratioDialogSize')['width'],
-            'height':  settings.value('ratioDialogSize')['height']
+            'height': settings.value('ratioDialogSize')['height']
         }
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.move(settings.value('ratioDialogDefaultPosition')['x'],
+                  settings.value('ratioDialogDefaultPosition')['y'])
+    
         self.ratio = currentValue
         self.opacity = settings.value('ratioDialogOpacity')
 
@@ -72,9 +75,7 @@ class RatioDialog(QMainWindow):
         list = []
         sum = 0
         temp = 0
-        color = settings.value('color') if settings.value(
-            'color') else defaultSettings['color']
-
+        color = settings.value('ratioBarColor')
         for value in self.ratio:
             sum += value
 
@@ -88,7 +89,7 @@ class RatioDialog(QMainWindow):
         for i in range(0, len(list)):
             self.labels[i].setGeometry(QRect(temp, 0, temp + list[i], 10))
             self.labels[i].setStyleSheet(
-                'background-color: ' + color[i] + ';')
+                'background-color: ' + color[i % 2] + ';')
 
             temp += list[i]
 
@@ -243,9 +244,13 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi()
         self.selectorWidget.setCurrentIndex(0)
 
+        # For uncompleted features
         # for item in recipeData['categories']:
         #     self.rankComboBox.addItem(item)
         self.rankComboBox.addItem("준비중인 기능입니다.")
+        self.dummyBox = QPushButton(self.mainWidget)
+        self.dummyBox.setText('준비 중인 기능입니다.')
+        self.dummyBox.setGeometry(QRect(230, 142, 281, 181))
 
         # Actions
         self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
@@ -441,12 +446,9 @@ class Ui_MainWindow(QMainWindow):
             'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc3</span></p></body></html>', None))
 
         # 재료 이름 라벨
-        self.stuffName0.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p>recipe_C:C</p></body></html>', None))
-        self.stuffName1.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p>recipe_D:D</p></body></html>', None))
-        self.stuffName2.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p>recipe_E:E</p></body></html>', None))
+        self.stuffName0.setText('')
+        self.stuffName1.setText('')
+        self.stuffName2.setText('')
 
         # % 기호 라벨
         self.percentLabel0.setText(QCoreApplication.translate(
@@ -578,6 +580,9 @@ class Ui_Settings(QMainWindow):
 
         # 비율 바 옵션
         self.barOption = QWidget()
+        self.disclaimerLabel = QLabel(self.barOption)
+        self.disclaimerLabel.setGeometry(QRect(40, 0, 240, 20))
+        self.disclaimerLabel.setText('※ 변경 사항은 바 On / Off 시 적용됩니다.')
 
         # 크기
         self.sizeLabel = QLabel(self.barOption)
@@ -676,6 +681,10 @@ class Ui_Settings(QMainWindow):
         self.ratioBarXPosInput.setValidator(QIntValidator(1, 3840))
         self.ratioBarYPosInput.setValidator(QIntValidator(1, 2160))
 
+        # 입력 마스크
+        self.ratioColorInput0.setInputMask("\#HHHHHH")
+        self.ratioColorInput1.setInputMask("\#HHHHHH")
+
         # 액션 지정
         self.mainWindowRadio0.clicked.connect(self.onRadioButtonClicked)
         self.mainWindowRadio1.clicked.connect(self.onRadioButtonClicked)
@@ -702,24 +711,42 @@ class Ui_Settings(QMainWindow):
         settings.setValue('ratioDialogOpacity', self.opacitySlider.value())
 
     def onXResolutionChanged(self):
+        temp = self.ratioBarWidthInput.text()
         val = settings.value('ratioDialogSize')
-        val['width'] = int(self.ratioBarWidthInput.text())
-        settings.setValue('ratioDialogSize', val)
+
+        if temp == '0' or temp == '':
+            reply = QMessageBox.critical(self, '오류', '너비는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
+            if reply == QMessageBox.Ok:
+                self.ratioBarWidthInput.setText(str(val['width']))
+        else:
+            
+            val['width'] = int(self.ratioBarWidthInput.text())
+            settings.setValue('ratioDialogSize', val)
 
     def onYResolutionChanged(self):
+        temp = self.ratioBarHeightInput.text()
         val = settings.value('ratioDialogSize')
-        val['height'] = int(self.ratioBarHeightInput.text())
-        settings.setValue('ratioDialogSize', val)
+
+        if temp == '0' or temp == '':
+            reply = QMessageBox.critical(self, '오류', '높이는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
+            if reply == QMessageBox.Ok:
+                self.ratioBarHeightInput.setText(str(val['height']))
+        else:
+            val['height'] = int(self.ratioBarHeightInput.text())
+            settings.setValue('ratioDialogSize', val)
 
     def onXPositionChanged(self):
         val = settings.value('ratioDialogDefaultPosition')
+        temp = self.ratioBarXPosInput.text()
+        if temp == '':
+            self.ratioBarXPosInput.setText('0')
         val['x'] = int(self.ratioBarXPosInput.text())
-        settings.setValue('ratioDialogSize', val)
+        settings.setValue('ratioDialogDefaultPosition', val)
 
     def onYPositionChanged(self):
         val = settings.value('ratioDialogDefaultPosition')
         val['y'] = int(self.ratioBarYPosInput.text())
-        settings.setValue('ratioDialogSize', val)
+        settings.setValue('ratioDialogDefaultPosition', val)
 
     def onColor0Changed(self):
         val = settings.value('ratioBarColor')
@@ -743,10 +770,10 @@ class Ui_Settings(QMainWindow):
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc704\uce58</span></p></body></html>", None))
 
         
-        self.ratioBarWidthInput.setText(settings.value('ratioDialogSize')['width'])
-        self.ratioBarHeightInput.setText(settings.value('ratioDialogSize')['height'])
-        self.ratioBarXPosInput.setText(settings.value('ratioDialogDefaultPosition')['x'])
-        self.ratioBarYPosInput.setText(settings.value('ratioDialogDefaultPosition')['y'])
+        self.ratioBarWidthInput.setText(str(settings.value('ratioDialogSize')['width']))
+        self.ratioBarHeightInput.setText(str(settings.value('ratioDialogSize')['height']))
+        self.ratioBarXPosInput.setText(str(settings.value('ratioDialogDefaultPosition')['x']))
+        self.ratioBarYPosInput.setText(str(settings.value('ratioDialogDefaultPosition')['y']))
         self.opacityLabel.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\ud22c\uba85\ub3c4</span></p></body></html>", None))
         self.ratioColorInput0.setText(settings.value('ratioBarColor')[0])

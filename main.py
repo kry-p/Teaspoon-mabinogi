@@ -5,6 +5,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import QFile, QCoreApplication, Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtUiTools import QUiLoader
 
 from ui.mainwindow import Ui_MainWindow
@@ -13,6 +14,7 @@ from ui.mainwindow import Ui_MainWindow
 if __name__ == "__main__":
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     app = QApplication([])
+    app.setWindowIcon(QIcon('resources/cookie.ico'))
     window = Ui_MainWindow()
     window.show()
     sys.exit(app.exec())
