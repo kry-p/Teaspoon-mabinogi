@@ -1,11 +1,11 @@
-# This Python file uses the following encoding: utf-8
+# encoding: utf-8
 import sys
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtGui import QIcon
 
-from ui.mainwindow import Ui_MainWindow
+from ui.window import Ui_MainWindow
 
 
 if __name__ == "__main__":

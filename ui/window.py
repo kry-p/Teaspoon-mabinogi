@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-                            QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt,
-                            QSettings)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-                           QCursor, QFont, QFontDatabase, QGradient,
-                           QIcon, QImage, QIntValidator, QKeySequence, QLinearGradient,
-                           QPainter, QPalette, QPixmap, QRadialGradient,
-                           QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QLabel,
-                               QLineEdit, QListView, QMainWindow, QMenu,
-                               QMenuBar, QPushButton, QRadioButton, QSizePolicy,
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
+                            QSize, Qt, QSettings)
+from PySide6.QtGui import (QAction, QCursor, QFont, QIntValidator)
+from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
+                               QListView, QMainWindow, QMenu, QMenuBar,
+                               QPushButton, QRadioButton, QSizePolicy,
                                QTabWidget, QTextEdit, QWidget, QMessageBox,
                                QSlider, QColorDialog)
 
@@ -33,7 +27,6 @@ defaultSettings = {
     'favorites': []
 }
 
-
 recipeData = {
     'categories': ['[1] 저미기', '[2] 수비드', '[3] 발효',
                    '[4] 피자 만들기', '[5] 찌기', '[6] 파이 만들기',
@@ -47,6 +40,8 @@ rangeFont = QFont('Arial', 1)
 settings = QSettings('Yuzu', 'Spoon')
 
 # 비율 바 창
+
+
 class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
@@ -57,7 +52,7 @@ class RatioDialog(QMainWindow):
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.move(settings.value('ratioDialogDefaultPosition')['x'],
                   settings.value('ratioDialogDefaultPosition')['y'])
-    
+
         self.ratio = currentValue
         self.opacity = settings.value('ratioDialogOpacity')
 
@@ -146,7 +141,68 @@ class Ui_MainWindow(QMainWindow):
         self._settingsDialog = None
         self._expanded = settings.value('initialWindowExpanded')
 
-        # 창 설정
+        self.setWindow()
+
+        # 메뉴 바 액션
+        self.settingsAction = QAction(self)
+        self.helpAction = QAction(self)
+
+        # 비율 박스
+        self.createStuffBox()
+
+        # 요리 정보 박스
+        self.createInfoBox()
+
+        # 왼쪽 툴박스
+        self.createLeftToolBox()
+
+        # 기타 버튼
+        self.ratioBarButton = QPushButton(self.mainWidget)
+        self.ratioBarButton.setGeometry(QRect(10, 280, 171, 31))
+        self.expandButton = QPushButton(self.mainWidget)
+        self.expandButton.setGeometry(QRect(190, 10, 31, 300))
+
+        self.setCentralWidget(self.mainWidget)
+        self.menuBar = QMenuBar(self)
+        self.menuBar.setGeometry(QRect(0, 0, 520, 24))
+        self.toolsMenu = QMenu(self.menuBar)
+        self.setMenuBar(self.menuBar)
+
+        self.menuBar.addAction(self.toolsMenu.menuAction())
+        self.toolsMenu.addAction(self.settingsAction)
+        self.toolsMenu.addSeparator()
+        self.toolsMenu.addAction(self.helpAction)
+
+        self.selectorWidget.setCurrentIndex(0)
+
+        # 비율 초깃값 지정
+        self.stuffRatio0.setText('100')
+        self.stuffRatio1.setText('100')
+        self.stuffRatio2.setText('100')
+
+        # 입력값 검증
+        self.stuffRatio0.setInputMask("000")
+        self.stuffRatio1.setInputMask("000")
+        self.stuffRatio2.setInputMask("000")
+
+        # 액션
+        self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
+        self.expandButton.clicked.connect(self.toggleExpandedWindow)
+        self.settingsAction.triggered.connect(self.openSettingsDialog)
+
+        # 미구현된 기능 커버
+        # for item in recipeData['categories']:
+        #     self.rankComboBox.addItem(item)
+        self.rankComboBox.addItem("준비중인 기능입니다.")
+        self.dummyBox = QPushButton(self.mainWidget)
+        self.dummyBox.setText('준비 중인 기능입니다.')
+        self.dummyBox.setGeometry(QRect(230, 142, 281, 181))
+
+        self.retranslateUi()
+        QMetaObject.connectSlotsByName(self)
+
+    # 창 기본 설정
+    def setWindow(self):
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -164,36 +220,22 @@ class Ui_MainWindow(QMainWindow):
 
         self.mainWidget = QWidget(self)
 
-        # 메뉴 바 액션
-        self.settingsAction = QAction(self)
-        self.helpAction = QAction(self)
-
-        # 비율 박스
-        self.createStuffBox()
-
-        # 비율 초깃값 지정
-        self.stuffRatio0.setText('100')
-        self.stuffRatio1.setText('100')
-        self.stuffRatio2.setText('100')
-
-        # 요리 정보 박스
-        self.createInfoBox()
-
-        # Left tab
+    # 좌측 툴박스
+    def createLeftToolBox(self):
         self.selectorWidget = QTabWidget(self.mainWidget)
         self.selectorWidget.setGeometry(QRect(10, 10, 171, 271))
 
-        # Left menu
         self.recipeListMenu = QWidget()
         self.searchMenu = QWidget()
         self.favoriteMenu = QWidget()
 
-        # First left menu
+        # 첫번째 탭
         self.rankComboBox = QComboBox(self.recipeListMenu)
         self.rankComboBox.setGeometry(QRect(12, 10, 141, 22))
         self.recipeListView = QListView(self.recipeListMenu)
         self.recipeListView.setGeometry(QRect(12, 40, 141, 187))
 
+        # 두번째 탭
         self.searchInput = QTextEdit(self.searchMenu)
         self.searchInput.setGeometry(QRect(12, 30, 141, 21))
         self.searchInput.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -207,6 +249,7 @@ class Ui_MainWindow(QMainWindow):
         self.stuffRadio = QRadioButton(self.searchMenu)
         self.stuffRadio.setGeometry(QRect(110, 10, 45, 16))
 
+        # 세번째 탭
         self.favoriteListView = QListView(self.favoriteMenu)
         self.favoriteListView.setGeometry(QRect(12, 10, 141, 195))
         self.alignUpButton = QPushButton(self.favoriteMenu)
@@ -220,41 +263,7 @@ class Ui_MainWindow(QMainWindow):
         self.selectorWidget.addTab(self.searchMenu, '')
         self.selectorWidget.addTab(self.favoriteMenu, '')
 
-        # Misc. buttons
-        self.ratioBarButton = QPushButton(self.mainWidget)
-        self.ratioBarButton.setGeometry(QRect(10, 280, 171, 31))
-        self.expandButton = QPushButton(self.mainWidget)
-        self.expandButton.setGeometry(QRect(190, 10, 31, 300))
-
-        self.setCentralWidget(self.mainWidget)
-        self.menuBar = QMenuBar(self)
-        self.menuBar.setGeometry(QRect(0, 0, 520, 24))
-        self.toolsMenu = QMenu(self.menuBar)
-        self.setMenuBar(self.menuBar)
-
-        self.menuBar.addAction(self.toolsMenu.menuAction())
-        self.toolsMenu.addAction(self.settingsAction)
-        self.toolsMenu.addSeparator()
-        self.toolsMenu.addAction(self.helpAction)
-
-        self.retranslateUi()
-        self.selectorWidget.setCurrentIndex(0)
-
-        # For uncompleted features
-        # for item in recipeData['categories']:
-        #     self.rankComboBox.addItem(item)
-        self.rankComboBox.addItem("준비중인 기능입니다.")
-        self.dummyBox = QPushButton(self.mainWidget)
-        self.dummyBox.setText('준비 중인 기능입니다.')
-        self.dummyBox.setGeometry(QRect(230, 142, 281, 181))
-
-        # Actions
-        self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
-        self.expandButton.clicked.connect(self.toggleExpandedWindow)
-        self.settingsAction.triggered.connect(self.openSettingsDialog)
-
-        QMetaObject.connectSlotsByName(self)
-
+    # 비율 박스
     def createStuffBox(self):
         # 비율 입력 박스
         self.ratiobox = QGroupBox(self.mainWidget)
@@ -288,6 +297,7 @@ class Ui_MainWindow(QMainWindow):
         self.percentLabel2 = QLabel(self.ratiobox)
         self.percentLabel2.setGeometry(QRect(245, 90, 21, 20))
 
+    # 정보 박스
     def createInfoBox(self):
         self.infoBox = QGroupBox(self.mainWidget)
         self.infoBox.setGeometry(QRect(230, 130, 281, 181))
@@ -297,6 +307,7 @@ class Ui_MainWindow(QMainWindow):
         self.createAtkBox()
         self.createDefBox()
 
+    # HP, MP, SP 박스
     def createChrBox(self):
         self.chrBox = QGroupBox(self.infoBox)
         self.chrBox.setGeometry(QRect(10, 20, 261, 31))
@@ -317,6 +328,7 @@ class Ui_MainWindow(QMainWindow):
         self.spValue = QLabel(self.chrBox)
         self.spValue.setGeometry(QRect(220, 10, 31, 16))
 
+    # 기초 스테이터스 박스
     def createStatBox(self):
         self.statBox = QGroupBox(self.infoBox)
         self.statBox.setGeometry(QRect(10, 60, 81, 111))
@@ -342,6 +354,7 @@ class Ui_MainWindow(QMainWindow):
         self.dexValue = QLabel(self.statBox)
         self.dexValue.setGeometry(QRect(40, 50, 31, 16))
 
+    # 공격 스테이터스 박스
     def createAtkBox(self):
         self.atkBox = QGroupBox(self.infoBox)
         self.atkBox.setGeometry(QRect(190, 60, 81, 111))
@@ -363,6 +376,7 @@ class Ui_MainWindow(QMainWindow):
         self.maxDamValue = QLabel(self.atkBox)
         self.maxDamValue.setGeometry(QRect(10, 37, 31, 16))
 
+    # 방어 스테이터스 박스
     def createDefBox(self):
         self.defBox = QGroupBox(self.infoBox)
         self.defBox.setGeometry(QRect(100, 60, 81, 111))
@@ -384,6 +398,7 @@ class Ui_MainWindow(QMainWindow):
         self.prtValue = QLabel(self.defBox)
         self.prtValue.setGeometry(QRect(40, 37, 31, 16))
 
+    # 메인 창 확장 / 축소
     def toggleExpandedWindow(self):
         if self._expanded:
             self.resize(231, 340)
@@ -393,11 +408,13 @@ class Ui_MainWindow(QMainWindow):
             self.setFixedSize(QSize(520, 340))
         self._expanded = not self._expanded
 
+    # 설정 창 열기
     def openSettingsDialog(self):
         if self._settingsDialog is None:
             self._settingsDialog = Ui_Settings()
         self._settingsDialog.show()
 
+    # 비율 바 열기 / 닫기
     def openCloseRatioDialog(self):
         data = [
             int(self.stuffRatio0.text()),
@@ -409,8 +426,8 @@ class Ui_MainWindow(QMainWindow):
         else:
             self._ratioDialog.close()
             self._ratioDialog = None
-        #     self._ratioDialog.update(data)
 
+    # 종료 시
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message',
                                      "정말 종료하시겠어요?", QMessageBox.Yes |
@@ -425,7 +442,7 @@ class Ui_MainWindow(QMainWindow):
         else:
             event.ignore()
 
-    # retranslateUi
+    # 텍스트 지정
     def retranslateUi(self):
         self.setWindowTitle('Spoon')
         self.settingsAction.setText('설정')
@@ -555,6 +572,8 @@ class Ui_MainWindow(QMainWindow):
         self.toolsMenu.setTitle(QCoreApplication.translate(
             'Spoon', u'\ub3c4\uad6c', None))
 
+# 설정 창
+
 
 class Ui_Settings(QMainWindow):
     def __init__(self):
@@ -611,7 +630,7 @@ class Ui_Settings(QMainWindow):
         self.ratioColorInput0.setGeometry(QRect(100, 80, 61, 20))
         self.colorSelectButton0 = QPushButton(self.barOption)
         self.colorSelectButton0.setGeometry(QRect(170, 75, 61, 30))
-        
+
         # 색상 B
         self.ratioColorLabel1 = QLabel(self.barOption)
         self.ratioColorLabel1.setGeometry(QRect(50, 110, 41, 20))
@@ -619,7 +638,6 @@ class Ui_Settings(QMainWindow):
         self.ratioColorInput1.setGeometry(QRect(100, 110, 61, 20))
         self.colorSelectButton1 = QPushButton(self.barOption)
         self.colorSelectButton1.setGeometry(QRect(170, 105, 61, 30))
-        
 
         # 투명도
         self.opacityLabel = QLabel(self.barOption)
@@ -719,11 +737,12 @@ class Ui_Settings(QMainWindow):
         val = settings.value('ratioDialogSize')
 
         if temp == '0' or temp == '':
-            reply = QMessageBox.critical(self, '오류', '너비는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
+            reply = QMessageBox.critical(
+                self, '오류', '너비는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
             if reply == QMessageBox.Ok:
                 self.ratioBarWidthInput.setText(str(val['width']))
         else:
-            
+
             val['width'] = int(self.ratioBarWidthInput.text())
             settings.setValue('ratioDialogSize', val)
 
@@ -732,7 +751,8 @@ class Ui_Settings(QMainWindow):
         val = settings.value('ratioDialogSize')
 
         if temp == '0' or temp == '':
-            reply = QMessageBox.critical(self, '오류', '높이는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
+            reply = QMessageBox.critical(
+                self, '오류', '높이는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
             if reply == QMessageBox.Ok:
                 self.ratioBarHeightInput.setText(str(val['height']))
         else:
@@ -768,11 +788,11 @@ class Ui_Settings(QMainWindow):
     def onColorPicker0Opened(self):
         pick = QColorDialog.getColor()
         self.ratioColorInput0.setText(pick.name())
-    
+
     def onColorPicker1Opened(self):
         pick = QColorDialog.getColor()
         self.ratioColorInput1.setText(pick.name())
-        
+
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate(
             "MainWindow", u"\uc124\uc815", None))
@@ -781,18 +801,21 @@ class Ui_Settings(QMainWindow):
         self.positionLabel.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc704\uce58</span></p></body></html>", None))
 
-        
-        self.ratioBarWidthInput.setText(str(settings.value('ratioDialogSize')['width']))
-        self.ratioBarHeightInput.setText(str(settings.value('ratioDialogSize')['height']))
-        self.ratioBarXPosInput.setText(str(settings.value('ratioDialogDefaultPosition')['x']))
-        self.ratioBarYPosInput.setText(str(settings.value('ratioDialogDefaultPosition')['y']))
+        self.ratioBarWidthInput.setText(
+            str(settings.value('ratioDialogSize')['width']))
+        self.ratioBarHeightInput.setText(
+            str(settings.value('ratioDialogSize')['height']))
+        self.ratioBarXPosInput.setText(
+            str(settings.value('ratioDialogDefaultPosition')['x']))
+        self.ratioBarYPosInput.setText(
+            str(settings.value('ratioDialogDefaultPosition')['y']))
         self.opacityLabel.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\ud22c\uba85\ub3c4</span></p></body></html>", None))
         self.ratioColorInput0.setText(settings.value('ratioBarColor')[0])
         self.ratioColorInput1.setText(settings.value('ratioBarColor')[1])
         self.colorSelectButton0.setText('선택')
         self.colorSelectButton1.setText('선택')
-   
+
         self.ratioColorLabel1.setText(QCoreApplication.translate(
             "MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">\uc0c9\uc0c1 B</span></p></body></html>", None))
         self.ratioColorLabel0.setText(QCoreApplication.translate(
