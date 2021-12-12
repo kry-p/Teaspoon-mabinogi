@@ -19,6 +19,9 @@ pip install PySide6
 
 4. 1.에서 다운로드한 파일의 압축을 풀어 Spoon.exe 파일을 사용합니다.
 
+## 알려진 문제
++ 커스텀 비율 바에서 재료 비율 값이 하나 이상 비어 있을 경우 비율 바 On/Off 기능이 작동하지 않음
+
 ## FAQ
 
 + Qt platform plugin 문제  
