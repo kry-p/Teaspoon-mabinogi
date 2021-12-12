@@ -4,7 +4,7 @@
 ## 설치 방법
 
 ### 일반  
-1. 최신 Release를 다운로드해 주세요.
+1. 최신 Release를 다운로드해 주세요. (Spoon.exe)
 
 2. [Python을 다운로드](https://www.python.org/downloads/) 후 설치합니다.
   + 3.9 이상 버전을 권장합니다.  
