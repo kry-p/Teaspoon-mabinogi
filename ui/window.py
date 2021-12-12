@@ -444,7 +444,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 텍스트 지정
     def retranslateUi(self):
-        self.setWindowTitle('Spoon')
+        self.setWindowTitle('Spoon v0.1')
         self.settingsAction.setText('설정')
         self.helpAction.setText('도움말')
         self.ratiobox.setTitle('비율')
