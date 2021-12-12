@@ -92,7 +92,7 @@ class RatioDialog(QMainWindow):
     # UI 요소 초기화
     def initUI(self):
         self.setWindowOpacity(
-            1 - (settings.value('ratioDialogOpacity')) * 0.008)
+            1 - float((settings.value('ratioDialogOpacity'))) * 0.008)
         self.resize(self.currentWindowSize['width'],
                     self.currentWindowSize['height'])
         self.setFixedSize(
@@ -211,7 +211,7 @@ class Ui_MainWindow(QMainWindow):
         self.setMinimumSize(QSize(231, 340))
         self.setMaximumSize(QSize(520, 340))
 
-        if self._expanded:
+        if self._expanded == 'true':
             self.resize(520, 340)
             self.setFixedSize(QSize(520, 340))
         else:
@@ -687,9 +687,9 @@ class Ui_Settings(QMainWindow):
         QMetaObject.connectSlotsByName(self)
 
         # 설정에서 초깃값 지정
-        self.opacitySlider.setSliderPosition(
-            settings.value('ratioDialogOpacity'))
-        if settings.value('initialWindowExpanded') is True:
+        self.opacitySlider.setSliderPosition(float(
+            settings.value('ratioDialogOpacity')))
+        if settings.value('initialWindowExpanded') == 'true':
             self.mainWindowRadio1.setChecked(True)
         else:
             self.mainWindowRadio0.setChecked(True)
