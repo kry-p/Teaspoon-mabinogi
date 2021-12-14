@@ -11,20 +11,21 @@ from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
 defaultSettings = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
-    'ratioDialogOpacity': 0,
+    'ratioDialogOpacity': 70,
     'ratioDialogDefaultPosition': {
-        'x': 358,
+        'x': 356,
         'y': 690
     },
     'ratioDialogSize': {
-        'width': 245,
+        'width': 243,
         'height': 10
     },
     'ratioBarColor': {
         0: '#ffff00',
         1: '#ff0000'
     },
-    'favorites': []
+    'favorites': [],
+    'ratioBarLocked': False
 }
 
 recipeData = {
@@ -39,12 +40,12 @@ recipeData = {
 rangeFont = QFont('Arial', 1)
 settings = QSettings('Yuzu', 'Spoon')
 
+
 # 비율 바 창
-
-
 class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
+        self.m_flag = False
         self.currentWindowSize = {
             'width': settings.value('ratioDialogSize')['width'],
             'height': settings.value('ratioDialogSize')['height']
@@ -57,7 +58,7 @@ class RatioDialog(QMainWindow):
         self.opacity = settings.value('ratioDialogOpacity')
 
         if not self.opacity:
-            settings.setValue('ratioDialogOpacity', 1.0)
+            settings.setValue('ratioDialogOpacity', 70)
 
         self.initUI()
 
@@ -92,7 +93,7 @@ class RatioDialog(QMainWindow):
     # UI 요소 초기화
     def initUI(self):
         self.setWindowOpacity(
-            1 - float((settings.value('ratioDialogOpacity'))) * 0.008)
+            float((settings.value('ratioDialogOpacity'))) * 0.01)
         self.resize(self.currentWindowSize['width'],
                     self.currentWindowSize['height'])
         self.setFixedSize(
@@ -111,7 +112,7 @@ class RatioDialog(QMainWindow):
 
     # 마우스 클릭 이벤트
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and settings.value('ratioBarLocked') == 'false':
             self.m_flag = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
@@ -145,7 +146,11 @@ class Ui_MainWindow(QMainWindow):
 
         # 메뉴 바 액션
         self.settingsAction = QAction(self)
+        self.lockRatioAction = QAction(self)
         self.helpAction = QAction(self)
+
+        self.lockRatioAction.setCheckable(True)
+        self.lockRatioAction.setChecked(True if settings.value('ratioBarLocked') == 'true' else False)
 
         # 비율 박스
         self.createStuffBox()
@@ -158,7 +163,7 @@ class Ui_MainWindow(QMainWindow):
 
         # 기타 버튼
         self.ratioBarButton = QPushButton(self.mainWidget)
-        self.ratioBarButton.setGeometry(QRect(10, 280, 171, 31))
+        self.ratioBarButton.setGeometry(QRect(9, 280, 171, 31))
         self.expandButton = QPushButton(self.mainWidget)
         self.expandButton.setGeometry(QRect(190, 10, 31, 300))
 
@@ -169,6 +174,7 @@ class Ui_MainWindow(QMainWindow):
         self.setMenuBar(self.menuBar)
 
         self.menuBar.addAction(self.toolsMenu.menuAction())
+        self.toolsMenu.addAction(self.lockRatioAction)
         self.toolsMenu.addAction(self.settingsAction)
         self.toolsMenu.addSeparator()
         self.toolsMenu.addAction(self.helpAction)
@@ -181,14 +187,15 @@ class Ui_MainWindow(QMainWindow):
         self.stuffRatio2.setText('100')
 
         # 입력값 검증
-        self.stuffRatio0.setInputMask("000")
-        self.stuffRatio1.setInputMask("000")
-        self.stuffRatio2.setInputMask("000")
+        self.stuffRatio0.setValidator(QIntValidator(0, 100))
+        self.stuffRatio1.setValidator(QIntValidator(0, 100))
+        self.stuffRatio2.setValidator(QIntValidator(0, 100))
 
         # 액션
         self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
         self.expandButton.clicked.connect(self.toggleExpandedWindow)
         self.settingsAction.triggered.connect(self.openSettingsDialog)
+        self.lockRatioAction.triggered.connect(self.toggleLockRatioBar)
 
         # 미구현된 기능 커버
         # for item in recipeData['categories']:
@@ -269,15 +276,15 @@ class Ui_MainWindow(QMainWindow):
         self.ratiobox = QGroupBox(self.mainWidget)
         self.ratiobox.setGeometry(QRect(230, 10, 281, 121))
 
-        self.stuffRatio0 = QLineEdit(self.ratiobox)
-        self.stuffRatio0.setGeometry(QRect(200, 30, 41, 20))
+        self.stuffLabel0 = QLabel(self.ratiobox)
+        self.stuffLabel0.setGeometry(QRect(10, 30, 41, 20))
         self.stuffLabel1 = QLabel(self.ratiobox)
         self.stuffLabel1.setGeometry(QRect(10, 60, 41, 20))
         self.stuffLabel2 = QLabel(self.ratiobox)
         self.stuffLabel2.setGeometry(QRect(10, 90, 41, 20))
 
-        self.stuffLabel0 = QLabel(self.ratiobox)
-        self.stuffLabel0.setGeometry(QRect(10, 30, 41, 20))
+        self.stuffRatio0 = QLineEdit(self.ratiobox)
+        self.stuffRatio0.setGeometry(QRect(200, 30, 41, 20))
         self.stuffRatio1 = QLineEdit(self.ratiobox)
         self.stuffRatio1.setGeometry(QRect(200, 60, 41, 20))
         self.stuffRatio2 = QLineEdit(self.ratiobox)
@@ -417,9 +424,9 @@ class Ui_MainWindow(QMainWindow):
     # 비율 바 열기 / 닫기
     def openCloseRatioDialog(self):
         data = [
-            int(self.stuffRatio0.text()),
-            int(self.stuffRatio1.text()),
-            int(self.stuffRatio2.text())
+            0 if self.stuffRatio0.text() == '' else int(self.stuffRatio0.text()),
+            0 if self.stuffRatio1.text() == '' else int(self.stuffRatio1.text()),
+            0 if self.stuffRatio2.text() == '' else int(self.stuffRatio2.text())
         ]
         if self._ratioDialog is None:
             self._ratioDialog = RatioDialog(data)
@@ -429,7 +436,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 종료 시
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Message',
+        reply = QMessageBox.question(self, '확인',
                                      "정말 종료하시겠어요?", QMessageBox.Yes |
                                      QMessageBox.No, QMessageBox.No)
 
@@ -442,9 +449,14 @@ class Ui_MainWindow(QMainWindow):
         else:
             event.ignore()
 
+    # 비율 바 잠금
+    def toggleLockRatioBar(self):
+        settings.setValue('ratioBarLocked', self.lockRatioAction.isChecked())
+
     # 텍스트 지정
     def retranslateUi(self):
         self.setWindowTitle('Spoon v0.1')
+        self.lockRatioAction.setText('비율 바 잠금')
         self.settingsAction.setText('설정')
         self.helpAction.setText('도움말')
         self.ratiobox.setTitle('비율')
@@ -572,9 +584,8 @@ class Ui_MainWindow(QMainWindow):
         self.toolsMenu.setTitle(QCoreApplication.translate(
             'Spoon', u'\ub3c4\uad6c', None))
 
+
 # 설정 창
-
-
 class Ui_Settings(QMainWindow):
     def __init__(self):
         super().__init__()

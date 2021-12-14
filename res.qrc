@@ -1,0 +1,6 @@
+<RCC>
+    <qresource>
+        <file>./resources/cookie.ico</file>
+        <file>./resources/NanumGothic.ttf</file>
+    </qresource>
+</RCC>
