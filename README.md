@@ -52,6 +52,14 @@ This application failed to start because no Qt platform plugin could be initiali
     + 변수 값 : (압축을 푼 경로)/platforms
 
   위 조치 후에도 문제가 발생하는 경우 개발자에게 문의해 주세요.
+ 
++ 설정 강제 초기화는 어떻게 하나요?  
+  레지스트리 편집기에서 ```HKEY_CURRENT_USER\SOFTWARE\Yuzu\Spoon``` 경로로 들어가면 설정 값이 저장되어 있습니다.
+  
+  <img width="721" alt="reg" src="https://user-images.githubusercontent.com/66104509/145965322-899063bc-09bf-4210-95df-ba9b2df046ae.PNG">
+  
+  (기본값)을 제외한 모든 키를 삭제하면 초기화가 완료됩니다.
+
 
 ## QnA
 해당 애드온 프로그램과 관련하여 문제나 궁금한 점이 있을 경우 jhjung.dev@gmail.com 이나 이 저장소의 Issues 란에 질문해 주세요.  
