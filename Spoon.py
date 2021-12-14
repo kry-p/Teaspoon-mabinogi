@@ -7,7 +7,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtUiTools import QUiLoader
 
 from ui.window import Ui_MainWindow
-import images
+import res
 
 
 if __name__ == "__main__":
