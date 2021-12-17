@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize, 
-                            Qt)
+from PySide6.QtCore import (QAbstractItemModel, QCoreApplication, QItemSelectionModel, QMetaObject, QModelIndex, QRect, QSize, 
+                            Qt, QPoint)
 from PySide6.QtGui import (QAction, QCursor, QFont,
                            QIntValidator, QStandardItem, QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
         self.rankComboBox.currentIndexChanged.connect(self.changeCategory)
         self.recipeListViewModel.currentChanged.connect(
             self.onRecipeListViewValueChanged)
-        self.favoriteListViewModel.currentChanged.connect(
+        self.favoriteListSelectionModel.currentChanged.connect(
             self.onFavoriteListViewValueChanged)
         self.alignUpButton.clicked.connect(self.onChangeFavoriteOrderUp)
         self.alignDownButton.clicked.connect(self.onChangeFavoriteOrderDown)
@@ -159,7 +159,8 @@ class MainWindow(QMainWindow):
         self.favoriteListView.setGeometry(QRect(12, 10, 171, 195))
         self.favoriteListModel = QStandardItemModel()
         self.favoriteListView.setModel(self.favoriteListModel)
-        self.favoriteListViewModel = self.favoriteListView.selectionModel()
+        self.favoriteListSelectionModel = self.favoriteListView.selectionModel()
+        self.favoriteListViewModel = self.favoriteListView.model()
 
         self.updateFavoriteList()
 
@@ -418,7 +419,7 @@ class MainWindow(QMainWindow):
 
     # 즐겨챶기 뷰에서 선택된 요리가 바뀔 때
     def onFavoriteListViewValueChanged(self):
-        currentIndex = self.favoriteListViewModel.currentIndex().row()
+        currentIndex = self.favoriteListSelectionModel.currentIndex().row()
 
         preferences.setValue(
             'currentFood', self.favorites[currentIndex])
@@ -435,26 +436,28 @@ class MainWindow(QMainWindow):
 
     # 선택된 즐겨찾기 요리를 위로
     def onChangeFavoriteOrderUp(self):
-        currentPos = self.favoriteListViewModel.currentIndex().row()
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
         if currentPos > 0:
             temp = self.favorites[currentPos - 1]
             self.favorites[currentPos - 1] = self.favorites[currentPos]
             self.favorites[currentPos] = temp
             self.updateFavoriteList()
+            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos - 1, 0))
 
     # 선택된 즐겨찾기 요리를 아래로
     def onChangeFavoriteOrderDown(self):
-        currentPos = self.favoriteListViewModel.currentIndex().row()
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
 
         if currentPos != -1 and currentPos < (len(self.favorites) - 1):
             temp = self.favorites[currentPos + 1]
             self.favorites[currentPos + 1] = self.favorites[currentPos]
             self.favorites[currentPos] = temp
             self.updateFavoriteList()
+            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos + 1, 0))
 
     # 선택된 즐겨찾기 요리 삭제
     def deleteSelectedFavorite(self):
-        currentPos = self.favoriteListViewModel.currentIndex().row()
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
         if currentPos != -1:
             self.favorites.pop(currentPos)
             self.updateFavoriteList()
