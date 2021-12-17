@@ -36,7 +36,7 @@ class DBManager:
     # 요리 정보 가져오기
     # ingredients: 재료1, 재료2, 재료3
     # specialEffects: 특수효과
-    # stats:
+    # stats: 스테이터스 효과
     def getFoodInfo(self, food):
         result = {
             'ingredients': self.getFoodIngredients(food),
@@ -75,5 +75,23 @@ class DBManager:
                       MATK, DEF, PRT, MDEF, MPRT\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+    # 재료 이름으로 검색
+    def searchByIngredient(self, ingredient):
+        sql = 'SELECT NAME\
+               FROM recipe\
+               WHERE INGREDIENT1 LIKE \'%' + ingredient + '%\'\
+                  OR INGREDIENT2 LIKE \'%' + ingredient + '%\'\
+                  OR INGREDIENT3 LIKE \'%' + ingredient + '%\''
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+    # 요리 이름으로 검색    
+    def searchByName(self, name):
+        sql = 'SELECT NAME\
+               FROM recipe\
+               WHERE NAME LIKE \'%' + name + '%\''
         self.cursor.execute(sql)
         return self.cursor.fetchall()
