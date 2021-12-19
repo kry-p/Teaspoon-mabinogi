@@ -445,14 +445,36 @@ class FullWindow(QMainWindow):
             result = list()
             
             if currentEnabled == 0:
-                result = db.searchByName(currentText)
+                try:
+                    result = db.searchByName(currentText)
+                except:
+                    result = None
+            if currentEnabled == 1:
+                categories = ["체력", "지력", "솜씨", "의지", "행운",
+                              "HP", "MP", "SP",
+                              "민댐", "맥댐", "마공",
+                              "방어", "보호", "마방", "마보", "효과"]
+                query = list()
+                for idx in range(len(categories)):
+                    if categories[idx] in currentText:
+                        query.append(True)
+                    else:
+                        query.append(False)
+                try:
+                    result = db.searchByEffect(query)
+                except:
+                    result = None
             if currentEnabled == 2:
-                result = db.searchByIngredient(currentText)
+                try:
+                    result = db.searchByIngredient(currentText)
+                except:
+                    result = None
                 
-            for item in result:
-                currentItem = QStandardItem(item[0])
-                currentItem.setEditable(False)
-                self.searchListModel.appendRow(currentItem)
+            if result is not None:
+                for item in result:
+                    currentItem = QStandardItem(item[0])
+                    currentItem.setEditable(False)
+                    self.searchListModel.appendRow(currentItem)
                 
     # 현재 카테고리 변경
     def changeCategory(self):

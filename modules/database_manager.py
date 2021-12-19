@@ -12,7 +12,11 @@ RECIPE_MILESTONE = {
                      '5', '6', '7', '8',
                      '9', 'A', 'B', 'C',
                      'D', 'E', 'F', 'P',
-                     'N']
+                     'N'],
+    'categoryColumns': ['STR', 'INT', 'DEX', 'WIL', 'LUC',
+                        'HP', 'MP', 'SP',
+                        'MINDAM', 'MAXDAM',
+                        'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX']
 }
 
 
@@ -95,3 +99,24 @@ class DBManager:
                WHERE NAME LIKE \'%' + name + '%\''
         self.cursor.execute(sql)
         return self.cursor.fetchall()
+    
+    # 효과 이름으로 검색 (OR)
+    def searchByEffect(self, selected):
+        constraiants = ''
+        for i in range(len(selected)):
+            if selected[i]:
+                if constraiants == '':
+                    constraiants += "%s NOT NULL " % RECIPE_MILESTONE['categoryColumns'][i]
+                elif i == (len(selected) - 1):
+                    constraiants += 'OR %s NOT NULL' % RECIPE_MILESTONE['categoryColumns'][i]
+                else:
+                    constraiants += 'OR %s NOT NULL ' % RECIPE_MILESTONE['categoryColumns'][i]
+
+        sql = 'SELECT NAME\
+               FROM recipe\
+               WHERE %s' % constraiants
+
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+        
