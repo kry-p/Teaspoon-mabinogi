@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (QApplication, QGroupBox, QLabel, QLineEdit,
     QSizePolicy, QWidget)
 
 class MiniWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent = None):
         super().__init__()
 
         if not self.objectName():

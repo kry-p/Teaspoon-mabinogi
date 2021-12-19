@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-from PySide6.QtCore import (QAbstractItemModel, QCoreApplication, QItemSelectionModel, QMetaObject, QModelIndex, QRect, QSize, 
-                            Qt, QPoint)
-from PySide6.QtGui import (QAction, QCursor, QFont,
-                           QIntValidator, QStandardItem, QStandardItemModel)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize)
+from PySide6.QtGui import (QAction, QFont, QIntValidator, QStandardItem,
+                           QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
-                               QTabWidget, QTextEdit, QWidget)
+                               QTabWidget, QWidget)
 from . import (database_manager, preferences_provider)
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 
-defaultPreferences = preferences_provider.defaultPreferences
 preferences = preferences_provider.QSettings('Yuzu', 'Spoon')
 db = database_manager.DBManager()
 
@@ -19,14 +17,11 @@ CATEGORIES = db.getCategories()
 
 # 메인 윈도우
 class FullWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, version):
         super().__init__()
+        preferences_provider.init()
 
-        # 초기 설정 (설정값이 없을 때)
-        for key, value in defaultPreferences.items():
-            if not preferences.contains(key):
-                preferences.setValue(key, value)
-
+        self.version = version
         self._ratioDialog = None
         self._settingsDialog = None
         self._expanded = preferences.value('initialWindowExpanded')
@@ -76,16 +71,9 @@ class FullWindow(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(231, 340))
+        self.setMinimumSize(QSize(520, 340))
         self.setMaximumSize(QSize(520, 340))
-
-        if self._expanded == 'true':
-            self.resize(520, 340)
-            self.setFixedSize(QSize(520, 340))
-        else:
-            self.resize(231, 340)
-            self.setFixedSize(QSize(231, 340))
-
+        self.setFixedSize(QSize(520, 340))
         self.mainWidget = QWidget(self)
 
     # 메뉴 바
@@ -319,20 +307,10 @@ class FullWindow(QMainWindow):
         self.maxDamValue.setGeometry(QRect(40, 37, 31, 16))
 
     """ ********** 액션 ********** """
-    # 메인 창 확장 / 축소
-    def toggleExpandedWindow(self):
-        if self._expanded:
-            self.resize(231, 340)
-            self.setFixedSize(QSize(231, 340))
-        else:
-            self.resize(520, 340)
-            self.setFixedSize(QSize(520, 340))
-        self._expanded = not self._expanded
-
     # 비율 바 잠금
     def toggleLockRatioBar(self):
         preferences.setValue('ratioBarLocked',
-                          self.actions['lockRatio'].isChecked())
+                            self.actions['lockRatio'].isChecked())
 
     # 현재 카테고리의 리스트 가져오기
     def getCurrentCategoryList(self):
@@ -358,6 +336,10 @@ class FullWindow(QMainWindow):
 
     # 요리 정보를 표시
     def setFoodInfo(self, foodName):
+        statValues = [self.strValue, self.intValue, self.dexValue, self.wilValue, self.lucValue,
+                 self.hpValue, self.mpValue, self.spValue,
+                 self.minDamValue, self.maxDamValue, self.mtkValue,
+                 self.defValue, self.defValue, self.mdfValue, self.mptValue]
         info = db.getFoodInfo(foodName)
         ingredients = info['ingredients'][0]
         ratio = info['ratio'][0]
@@ -373,36 +355,8 @@ class FullWindow(QMainWindow):
                 self.stuffRatioInputs[i].setText(str(int(ratio[i])))
 
         self.eftValue.setText('' if special[0] is None else special[0])
-        self.strValue.setText(
-            '' if stats[0] is None else str(int(stats[0])))
-        self.intValue.setText(
-            '' if stats[1] is None else str(int(stats[1])))
-        self.dexValue.setText(
-            '' if stats[2] is None else str(int(stats[2])))
-        self.wilValue.setText(
-            '' if stats[3] is None else str(int(stats[3])))
-        self.lucValue.setText(
-            '' if stats[4] is None else str(int(stats[4])))
-        self.hpValue.setText(
-            '' if stats[5] is None else str(int(stats[5])))
-        self.mpValue.setText(
-            '' if stats[6] is None else str(int(stats[6])))
-        self.spValue.setText(
-            '' if stats[7] is None else str(int(stats[7])))
-        self.minDamValue.setText(
-            '' if stats[8] is None else str(int(stats[8])))
-        self.maxDamValue.setText(
-            '' if stats[9] is None else str(int(stats[9])))
-        self.mtkValue.setText(
-            '' if stats[10] is None else str(int(stats[10])))
-        self.defValue.setText(
-            '' if stats[11] is None else str(int(stats[11])))
-        self.prtValue.setText(
-            '' if stats[12] is None else str(int(stats[12])))
-        self.mdfValue.setText(
-            '' if stats[13] is None else str(int(stats[13])))
-        self.mptValue.setText(
-            '' if stats[14] is None else str(int(stats[14])))
+        for idx in range(len(statValues)):
+            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
 
     # 설정 창 열기
     def openSettingsDialog(self, food):
@@ -526,7 +480,7 @@ class FullWindow(QMainWindow):
     # 텍스트 지정
     def retranslateUi(self):
         # 제목
-        self.setWindowTitle('Spoon v0.1.1')
+        self.setWindowTitle('Spoon %s' % self.version)
 
         # 메뉴 바
         self.actions['lockRatio'].setText('비율 바 잠금')

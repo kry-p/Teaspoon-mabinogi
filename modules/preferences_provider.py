@@ -19,6 +19,15 @@ defaultPreferences = {
     'favorites': [],
     'ratioBarLocked': False,
     'currentCategoryIndex': 0,
-    'currentFood': ''
+    'currentFood': '',
 }
+
 preferences = QSettings('Yuzu', 'Spoon')
+
+def init():
+    # 초기 설정 (설정값이 없을 때)
+    for key, value in defaultPreferences.items():
+        if not preferences.contains(key):
+            preferences.setValue(key, value)
+
+

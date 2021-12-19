@@ -3,12 +3,41 @@ import sys
 import res
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QCoreApplication, Qt
-from PySide6.QtGui import QIcon, QFontDatabase, QFont
+from PySide6.QtCore import QCoreApplication,  Qt
+from PySide6.QtGui import QIcon, QFont
 from PySide6.QtUiTools import QUiLoader
 
-from modules import window
+from modules.fullwindow import FullWindow
+from modules.preferences_provider import preferences
 
+APP_VERSION = 'v0.1.2'
+
+# from modules import window
+
+# class MainWindow(QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.initUi()
+
+#     def initUi(self):
+#         self.resize(QSize(190, 190))
+#         self.center()
+#         self.layout = QStackedLayout()
+
+#         fullWindow = FullWindow()
+#         miniWindow = MiniWindow()
+
+#         self.layout.addWidget(fullWindow)
+#         self.layout.addWidget(miniWindow)
+
+#         self.layout.setCurrentIndex(0 if preferences.value('initialWindowExpanded') == 'true' else 1)
+#         self.show()
+
+#     def center(self):
+#         qr = self.frameGeometry()
+#         cp = QScreen().availableGeometry().center()
+#         qr.moveCenter(cp)
+#         self.move(qr.topLeft())
 
 if __name__ == "__main__":
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
@@ -18,7 +47,23 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon(':/resources/cookie.ico'))
     app.setFont(QFont(font))
 
-    windowManager = window.manager
-    windowManager.showMainWindow()
-    
+    # window = QStackedWidget()
+    # window.setWindowTitle('Spoon')
+
+    # # 스택 순서 변경
+    # if preferences.value('initialWIndowExpanded') == 'false':
+    #     window.addWidget(FullWindow())
+    #     window.addWidget(MiniWindow())
+    # else:
+    #     window.addWidget(MiniWindow())
+    #     window.addWidget(FullWindow())
+
+    # window.show()
+
+    # window = FullWindow() if preferences.value('initialWindowExpanded') == 'true' else MiniWindow()
+    window = FullWindow(APP_VERSION)
+    window.show()
+
     sys.exit(app.exec())
+
+
