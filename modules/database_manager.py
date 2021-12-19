@@ -115,7 +115,6 @@ class DBManager:
         sql = 'SELECT NAME\
                FROM recipe\
                WHERE %s' % constraiants
-
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 

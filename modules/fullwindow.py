@@ -339,7 +339,7 @@ class FullWindow(QMainWindow):
         statValues = [self.strValue, self.intValue, self.dexValue, self.wilValue, self.lucValue,
                  self.hpValue, self.mpValue, self.spValue,
                  self.minDamValue, self.maxDamValue, self.mtkValue,
-                 self.defValue, self.defValue, self.mdfValue, self.mptValue]
+                 self.defValue, self.prtValue, self.mdfValue, self.mptValue]
         info = db.getFoodInfo(foodName)
         ingredients = info['ingredients'][0]
         ratio = info['ratio'][0]
