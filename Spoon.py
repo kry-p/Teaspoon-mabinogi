@@ -10,7 +10,7 @@ from PySide6.QtUiTools import QUiLoader
 from modules.fullwindow import FullWindow
 from modules.preferences_provider import preferences
 
-APP_VERSION = 'v0.1.2'
+APP_VERSION = 'v0.1.2.1'
 
 # from modules import window
 
