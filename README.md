@@ -10,9 +10,10 @@
 ## 🔑 설치 / 사용 방법
 
 ### 일반
-1. [Releases 페이지](https://github.com/kry-p/Teaspoon-mabinogi/releases)에서 최신 버전을 다운로드합니다.
+1. [Releases 페이지](https://github.com/kry-p/Teaspoon-mabinogi/releases)에서 최신 버전을 다운로드합니다.  
+   DB 파일도 ```Spoon.exe``` 파일과 같은 경로에 저장하셔야 정상적으로 실행됩니다.
 
-2. Spoon.exe 파일을 실행합니다.
+2. ```Spoon.exe``` 파일을 실행합니다.
 
 ### 고급 (Python 관련 지식이 있을 경우, 권장하지 않음)  
 1. 이 저장소를 다운로드합니다. (master branch)
@@ -28,10 +29,10 @@ cmd 또는 PowerShell으로 아래 명령을 실행해 주세요.
 pip install PySide6
 ```
 
-4. Spoon.py 파일을 실행합니다.
+4. ```Spoon.py``` 파일을 실행합니다.
 
 ## 알려진 문제
--
+- 설정에서 즐겨찾기를 초기화하였을 때 실제 초기화된 내용이 즉시 반영되지 않음
 
 ## FAQ - ⚠ 문제가 있으면 여기부터 읽어 주세요 ⚠
 
@@ -54,11 +55,9 @@ This application failed to start because no Qt platform plugin could be initiali
   위 조치 후에도 문제가 발생하는 경우 개발자에게 문의해 주세요.
  
 + 설정 강제 초기화는 어떻게 하나요?  
-  레지스트리 편집기에서 ```HKEY_CURRENT_USER\SOFTWARE\Yuzu\Spoon``` 경로로 들어가면 설정 값이 저장되어 있습니다.
+  [Releases 페이지](https://github.com/kry-p/Teaspoon-mabinogi/releases)에서 Reset.exe 파일을 다운로드 후 실행합니다.
   
-  <img width="721" alt="reg" src="https://user-images.githubusercontent.com/66104509/145965322-899063bc-09bf-4210-95df-ba9b2df046ae.PNG">
-  
-  (기본값)을 제외한 모든 키를 삭제하면 초기화가 완료됩니다.
+  콘솔 창에서 초기화에 동의하면 초기화 작업이 진행됩니다.
 
 
 ## QnA
