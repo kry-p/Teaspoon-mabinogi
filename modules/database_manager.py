@@ -7,18 +7,20 @@ RECIPE_MILESTONE = {
                      '[7] 잼 만들기', '[8] 파스타 만들기', '[9] 볶기',
                      '[A] 튀기기', '[B] 면 만들기', '[C] 끓이기',
                      '[D] 반죽', '[E] 삶기', '[F] 굽기',
-                     '[P] 혼합', '[N] 기타'],
+                     '[P] 혼합'],
     'categoryCode': ['1', '2', '3', '4',
                      '5', '6', '7', '8',
                      '9', 'A', 'B', 'C',
-                     'D', 'E', 'F', 'P',
-                     'N'],
+                     'D', 'E', 'F', 'P'],
     'categoryColumns': ['STR', 'INT', 'DEX', 'WIL', 'LUC',
                         'HP', 'MP', 'SP',
                         'MINDAM', 'MAXDAM',
                         'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX']
 }
 
+RECIPE_MILESTONE['categoryName'].reverse()
+RECIPE_MILESTONE['categoryColumns'].reverse()
+RECIPE_MILESTONE['categoryCode'].reverse()
 
 class DBManager:
     def __init__(self):
@@ -106,11 +108,11 @@ class DBManager:
         for i in range(len(selected)):
             if selected[i]:
                 if constraiants == '':
-                    constraiants += "%s NOT NULL " % RECIPE_MILESTONE['categoryColumns'][i]
+                    constraiants += "%s NOT NULL " % RECIPE_MILESTONE['categoryColumns'][15 - i]
                 elif i == (len(selected) - 1):
-                    constraiants += 'OR %s NOT NULL' % RECIPE_MILESTONE['categoryColumns'][i]
+                    constraiants += 'OR %s NOT NULL' % RECIPE_MILESTONE['categoryColumns'][15 - i]
                 else:
-                    constraiants += 'OR %s NOT NULL ' % RECIPE_MILESTONE['categoryColumns'][i]
+                    constraiants += 'OR %s NOT NULL ' % RECIPE_MILESTONE['categoryColumns'][15 - i]
 
         sql = 'SELECT NAME\
                FROM recipe\

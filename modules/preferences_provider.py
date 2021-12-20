@@ -22,7 +22,8 @@ defaultPreferences = {
     'currentFood': '',
 }
 
-preferences = QSettings('Yuzu', 'Spoon')
+# preferences = QSettings("./spoon.ini", QSettings.IniFormat)
+preferences = QSettings("Yuzu", "Spoon")
 
 def init():
     # 초기 설정 (설정값이 없을 때)

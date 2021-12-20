@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize)
-from PySide6.QtGui import (QAction, QFont, QIntValidator, QStandardItem,
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
+                            Qt, QFileSystemWatcher)
+from PySide6.QtGui import (QAction, QFont, QStandardItem,
                            QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar,
@@ -10,7 +11,7 @@ from . import (database_manager, preferences_provider)
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 
-preferences = preferences_provider.QSettings('Yuzu', 'Spoon')
+preferences = preferences_provider.preferences
 db = database_manager.DBManager()
 
 CATEGORIES = db.getCategories()
@@ -24,8 +25,8 @@ class FullWindow(QMainWindow):
         self.version = version
         self._ratioDialog = None
         self._settingsDialog = None
-        self._expanded = preferences.value('initialWindowExpanded')
         self.currentCategoryItems = None
+        self._expanded = preferences.value('initialWindowExpanded')
         self.currentFood = preferences.value('currentFood')
         self.favorites = preferences.value('favorites')
 
@@ -121,7 +122,7 @@ class FullWindow(QMainWindow):
 
         self.rankComboBox.addItems(CATEGORIES['categoryName'])
         self.rankComboBox.setCurrentIndex(
-            preferences.value('currentCategoryIndex'))
+            int(preferences.value('currentCategoryIndex')))
 
         self.getCurrentCategoryList()
         if self.currentFood != '':
@@ -133,16 +134,19 @@ class FullWindow(QMainWindow):
         self.searchListView = QListView(self.searchMenu)
         self.searchListView.setGeometry(QRect(12, 56, 171, 171))
         self.searchButton = QPushButton(self.searchMenu)
-        self.searchButton.setGeometry(138, 30, 45, 21)
+        self.searchButton.setGeometry(138, 29, 46, 23)
         self.searchListModel = QStandardItemModel()
         self.searchListView.setModel(self.searchListModel)
         self.searchListSelectionModel = self.searchListView.selectionModel()
         self.nameRadio = QRadioButton(self.searchMenu)
         self.nameRadio.setGeometry(QRect(15, 10, 45, 16))
         self.effectRadio = QRadioButton(self.searchMenu)
-        self.effectRadio.setGeometry(QRect(63, 10, 45, 16))
+        self.effectRadio.setGeometry(QRect(76, 10, 45, 16))
         self.stuffRadio = QRadioButton(self.searchMenu)
-        self.stuffRadio.setGeometry(QRect(110, 10, 45, 16))
+        self.stuffRadio.setGeometry(QRect(138, 10, 45, 16))
+
+        self.setTabOrder(self.searchInput, self.searchButton)
+        self.setTabOrder(self.searchButton, self.searchListView)
 
         self.nameRadio.setChecked(True)
 
@@ -193,14 +197,7 @@ class FullWindow(QMainWindow):
             self.percentLabels[i].setGeometry(QRect(260, 30 + i * 30, 21, 20))
             self.stuffRatioInputs[i].setGeometry(
                 QRect(215, 30 + i * 30, 41, 20))
-
-        # 비율 초깃값 지정
-        for input in self.stuffRatioInputs:
-            input.setText('100')
-
-        # 입력값 검증
-        for input in self.stuffRatioInputs:
-            input.setValidator(QIntValidator(0, 100))
+            self.stuffRatioInputs[i].setEnabled(False) 
 
     # 정보 박스
     def createInfoBox(self):
@@ -315,15 +312,14 @@ class FullWindow(QMainWindow):
     # 현재 카테고리의 리스트 가져오기
     def getCurrentCategoryList(self):
         self.recipeListModel.clear()
-        if self.rankComboBox.currentIndex() != 16:
-            self.currentCategoryItems = db.getFoods(
-                CATEGORIES['categoryCode'][self.rankComboBox.currentIndex()])
+        self.currentCategoryItems = db.getFoods(
+            CATEGORIES['categoryCode'][self.rankComboBox.currentIndex()])
 
-            for item in self.currentCategoryItems:
-                currentItem = QStandardItem(item[0])
-                currentItem.setEditable(False)
+        for item in self.currentCategoryItems:
+            currentItem = QStandardItem(item[0])
+            currentItem.setEditable(False)
 
-                self.recipeListModel.appendRow(currentItem)
+            self.recipeListModel.appendRow(currentItem)
 
     # 목록 뷰에서 값이 바뀔 때
     def onRecipeListViewValueChanged(self):
@@ -356,7 +352,14 @@ class FullWindow(QMainWindow):
 
         self.eftValue.setText('' if special[0] is None else special[0])
         for idx in range(len(statValues)):
-            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
+            val = stats[idx]
+
+            if val is not None:
+                statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
+                if int(val) > 0:
+                    statValues[idx].setStyleSheet('color: #%s;' % '0099FF')
+                else:
+                    statValues[idx].setStyleSheet('color: #%s;' % 'FF0000')
 
     # 설정 창 열기
     def openSettingsDialog(self, food):
@@ -377,9 +380,10 @@ class FullWindow(QMainWindow):
     # 즐겨챶기 뷰에서 선택된 요리가 바뀔 때
     def onFavoriteListViewValueChanged(self):
         currentIndex = self.favoriteListSelectionModel.currentIndex().row()
-        preferences.setValue(
-            'currentFood', self.favoriteListModel.item(currentIndex, 0).text())
-        self.setFoodInfo(self.favorites[currentIndex])
+        if currentIndex != -1:
+            preferences.setValue(
+                'currentFood', self.favoriteListModel.item(currentIndex, 0).text())
+            self.setFoodInfo(self.favoriteListModel.item(currentIndex, 0).text())
 
     # 검색 뷰에서 선택된 요리가 바뀔 때
     def onSearchListViewValueChanged(self):
@@ -394,10 +398,11 @@ class FullWindow(QMainWindow):
     def updateFavoriteList(self):
         self.favoriteListModel.clear()
 
-        for item in self.favorites:
-            currentItem = QStandardItem(item)
-            currentItem.setEditable(False)
-            self.favoriteListModel.appendRow(currentItem)
+        if self.favorites is not None:
+            for item in self.favorites:
+                currentItem = QStandardItem(item)
+                currentItem.setEditable(False)
+                self.favoriteListModel.appendRow(currentItem)
 
     # 선택된 즐겨찾기 요리를 위로
     def onChangeFavoriteOrderUp(self):
@@ -498,6 +503,13 @@ class FullWindow(QMainWindow):
             self._ratioDialog.close()
         if self._settingsDialog:
             self._settingsDialog.close()
+    
+    # 키 이벤트
+    def keyPressEvent(self, event):
+        # Enter 버튼을 누를 때 검색
+        if self.selectorWidget.currentIndex() == 1:
+            if event.key() == Qt.Key_Return:
+                self.searchButton.click()
 
     # 텍스트 지정
     def retranslateUi(self):
@@ -525,15 +537,10 @@ class FullWindow(QMainWindow):
         for i in range(0, 3):
             self.stuffLabels[i].setText(QCoreApplication.translate(
                 'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc%s</span></p></body></html>' % str(i + 1), None))  # 재료 라벨
-            # self.stuffNames[i].setText('') # 재료 이름 라벨
             self.percentLabels[i].setText('%')  # % 기호 라벨
 
         self.infoBox.setTitle(QCoreApplication.translate(
             'Spoon', u'\uc815\ubcf4', None))
-        self.chrBox.setTitle('')
-        self.statBox.setTitle('')
-        self.defBox.setTitle('')
-        self.atkBox.setTitle('')
 
         self.hpLabel.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>HP</span></p></body></html>', None))
@@ -573,9 +580,10 @@ class FullWindow(QMainWindow):
 
         self.selectorWidget.setTabText(self.selectorWidget.indexOf(
             self.recipeListMenu), QCoreApplication.translate('Spoon', u'\ubaa9\ub85d', None))
-        
         self.selectorWidget.setTabText(self.selectorWidget.indexOf(
             self.searchMenu), QCoreApplication.translate('Spoon', u'\uac80\uc0c9', None))
+        self.selectorWidget.setTabText(self.selectorWidget.indexOf(
+            self.favoriteMenu), QCoreApplication.translate('Spoon', u'\u2606', None))
 
         self.alignUpButton.setText(
             QCoreApplication.translate('Spoon', u'\u25b3', None))
@@ -584,11 +592,7 @@ class FullWindow(QMainWindow):
         self.favoriteDeleteButton.setText(
             QCoreApplication.translate('Spoon', u'\uc0ad\uc81c', None))
 
-        self.selectorWidget.setTabText(self.selectorWidget.indexOf(
-            self.favoriteMenu), QCoreApplication.translate('Spoon', u'\u2606', None))
         self.ratioBarButton.setText(QCoreApplication.translate(
             'Spoon', u'\ube44\uc728 \ubc14 On / Off', None))
-        # self.expandButton.setText(
-        #     QCoreApplication.translate('Spoon', u'\u300b', None))
         self.toolsMenu.setTitle(QCoreApplication.translate(
             'Spoon', u'\ub3c4\uad6c', None))

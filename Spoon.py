@@ -1,6 +1,7 @@
 # encoding: utf-8
 import sys
 import res
+import random
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication,  Qt
@@ -44,7 +45,11 @@ if __name__ == "__main__":
     app = QApplication([])
     font = QFont('NanumGothic')
     font.setPointSize(9)
-    app.setWindowIcon(QIcon(':/resources/cookie.ico'))
+
+    if random.randrange(1, 11) == 7:
+        app.setWindowIcon(QIcon(':/resources/cookie_alt.ico'))
+    else:
+        app.setWindowIcon(QIcon(':/resources/cookie.ico'))
     app.setFont(QFont(font))
 
     # window = QStackedWidget()
