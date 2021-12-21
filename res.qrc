@@ -1,6 +1,7 @@
-<RCC>
-    <qresource>
-        <file>./resources/cookie.ico</file>
-        <file>./resources/cookie_alt.ico</file>
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="icons">
+        <file alias="cookie.ico">./resources/cookie.ico</file>
+        <file alias="cookie_alt.ico">./resources/cookie_alt.ico</file>
     </qresource>
 </RCC>

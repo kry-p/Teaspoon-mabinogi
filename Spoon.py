@@ -1,7 +1,8 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 import sys
-import res
+import os
 import random
+import res
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication,  Qt
@@ -10,6 +11,7 @@ from PySide6.QtUiTools import QUiLoader
 
 from modules.fullwindow import FullWindow
 from modules.preferences_provider import preferences
+
 
 APP_VERSION = 'v0.1.2.1'
 
@@ -41,15 +43,24 @@ APP_VERSION = 'v0.1.2.1'
 #         self.move(qr.topLeft())
 
 if __name__ == "__main__":
+
+    try:
+        os.chdir(sys._MEIPASS)
+        print(sys._MEIPASS)
+    except:
+        os.chdir(os.getcwd())
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     app = QApplication([])
     font = QFont('NanumGothic')
     font.setPointSize(9)
-
     if random.randrange(1, 11) == 7:
-        app.setWindowIcon(QIcon(':/resources/cookie_alt.ico'))
+        app.setWindowIcon(QIcon(res.icon_alt))
     else:
-        app.setWindowIcon(QIcon(':/resources/cookie.ico'))
+        app.setWindowIcon(QIcon(res.icon))
+    # if random.randrange(1, 11) == 7:
+    #     app.setWindowIcon(QIcon(':/resources/cookie_alt.ico'))
+    # else:
+    #     app.setWindowIcon(QIcon(':/resources/cookie.ico'))
     app.setFont(QFont(font))
 
     # window = QStackedWidget()

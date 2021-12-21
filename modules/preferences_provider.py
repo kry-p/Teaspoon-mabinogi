@@ -1,4 +1,5 @@
-from PySide6.QtCore import QSettings
+# -*- coding: utf-8 -*-
+from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
 defaultPreferences = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
@@ -16,14 +17,21 @@ defaultPreferences = {
         0: '#ffff00',
         1: '#ff0000'
     },
-    'favorites': [],
+    'favorites': {
+        'item': []
+    },
     'ratioBarLocked': False,
     'currentCategoryIndex': 0,
     'currentFood': '',
 }
 
-# preferences = QSettings("./spoon.ini", QSettings.IniFormat)
-preferences = QSettings("Yuzu", "Spoon")
+local_path = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
+preferences = QSettings(local_path + "\\spoon.ini", QSettings.IniFormat)
+
+# Settings watcher
+paths = [local_path + '\\spoon.ini']
+watcher = QFileSystemWatcher()
+watcher.addPaths(paths)
 
 def init():
     # 초기 설정 (설정값이 없을 때)

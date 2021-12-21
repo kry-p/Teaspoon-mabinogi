@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(['Spoon.py'],
              pathex=[],
              binaries=[],
-             datas=[('./resources/*','./resources')],
+             datas=[('cookie.ico', '.'), ('cookie_alt.ico', '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -37,5 +37,4 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None,
-          icon='resources\\cookie.ico')
+          entitlements_file=None , icon='cookie.ico')
