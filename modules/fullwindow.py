@@ -7,31 +7,32 @@ from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
                                QTabWidget, QWidget)
-from . import (database_manager, preferences_provider)
+from . import (database_manager)
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
+from .preferences_provider import (preferences, watcher, init, getPreferences)
 
-preferences = preferences_provider.preferences
-watcher = preferences_provider.watcher
-db = database_manager.DBManager()
+preferences = preferences  # 애플리케이션 설정
+watcher = watcher  # 설정 값 변화 감지
+db = database_manager.DBManager()  # 레시피 데이터베이스
+CATEGORIES = db.getCategories()  # 카테고리 정보
 
-CATEGORIES = db.getCategories()
+COLOR_POSITIVE = '#0099FF'
+COLOR_NEGATIVE = '#FF0000'
+STYLE_BOLD = 'font-weight: 600;'
 
 # 메인 윈도우
 class FullWindow(QMainWindow):
     def __init__(self, version):
         super().__init__()
-        preferences_provider.init()
-
-        # Settings watcher
-        watcher.fileChanged.connect(self.onFileChanged)
+        init()
 
         self.version = version
         self.ratioDialog = None
         self.settingsDialog = None
-        self.expanded = preferences.value('initialWindowExpanded')
-        self.currentFood = preferences.value('currentFood')
-        self.favorites = [] if preferences.value('favorites')['item'] is None else preferences.value('favorites')['item']
+        self.expanded = getPreferences('initialWindowExpanded')
+        self.currentFood = getPreferences('currentFood')
+        self.favorites = [] if getPreferences('favorites')['item'] is None else getPreferences('favorites')['item']
 
         self.setWindow()  # 윈도우 기본 설정
         self.createMenuBar()  # 메뉴 바
@@ -64,13 +65,16 @@ class FullWindow(QMainWindow):
         self.favoriteDeleteButton.clicked.connect(self.deleteSelectedFavorite)
         self.searchButton.clicked.connect(self.search)
 
+        # Settings watcher
+        watcher.fileChanged.connect(self.onFileChanged)
+
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
 
     # 설정 파일 내용 바뀔 시
     def onFileChanged(self):
         # 즐겨찾기 초기화 감지
-        favorites = preferences.value('favorites')['item']
+        favorites = getPreferences('favorites')['item']
         if favorites is not None:
             if len(favorites) == 0:
                 self.favorites = []
@@ -102,7 +106,7 @@ class FullWindow(QMainWindow):
         }
         self.actions['lockRatio'].setCheckable(True)
         self.actions['lockRatio'].setChecked(
-            True if preferences.value('ratioBarLocked') == 'true' else False)
+            True if getPreferences('ratioBarLocked') == 'true' else False)
 
         self.menuBar.addAction(self.toolsMenu.menuAction())
         self.toolsMenu.addAction(self.actions['lockRatio'])
@@ -134,7 +138,7 @@ class FullWindow(QMainWindow):
 
         self.rankComboBox.addItems(CATEGORIES['categoryName'])
         self.rankComboBox.setCurrentIndex(
-            int(preferences.value('currentCategoryIndex')))
+            int(getPreferences('currentCategoryIndex')))
 
         self.getCurrentCategoryList()
         if self.currentFood != '':
@@ -330,7 +334,6 @@ class FullWindow(QMainWindow):
         for item in currentCategoryItems:
             currentItem = QStandardItem(item[0])
             currentItem.setEditable(False)
-
             self.recipeListModel.appendRow(currentItem)
 
     # 목록 뷰에서 값이 바뀔 때
@@ -369,9 +372,9 @@ class FullWindow(QMainWindow):
             if val is not None:
                 statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
                 if int(val) > 0:
-                    statValues[idx].setStyleSheet('color: #%s;' % '0099FF')
+                    statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
                 else:
-                    statValues[idx].setStyleSheet('color: #%s;' % 'FF0000')
+                    statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
 
     # 설정 창 열기
     def openSettingsDialog(self, food):
@@ -386,9 +389,7 @@ class FullWindow(QMainWindow):
             selected = self.recipeListModel.item(currentIndex, 0).text()
             self.favorites.append(selected)
             self.favorites = list(dict.fromkeys(self.favorites))
-            preferences.setValue('favorites', {
-                'item': self.favorites
-            })
+            preferences.setValue('favorites', {'item': self.favorites})
             self.updateFavoriteList()
 
     # 즐겨찾기에 추가 (검색)
@@ -553,24 +554,20 @@ class FullWindow(QMainWindow):
 
         # 비율 섹션
         self.ratioBox.setTitle('비율')
-
+        
         # 검색
-        self.nameRadio.setText(QCoreApplication.translate(
-            'Spoon', u'\uc774\ub984', None))
-        self.effectRadio.setText(QCoreApplication.translate(
-            'Spoon', u'\ud6a8\uacfc', None))
-        self.stuffRadio.setText(QCoreApplication.translate(
-            'Spoon', u'\uc7ac\ub8cc', None))
+        self.nameRadio.setText('이름')
+        self.effectRadio.setText('효과')
+        self.stuffRadio.setText('재료')
         self.searchButton.setText('검색')
 
         # 재료 라벨
         for i in range(0, 3):
-            self.stuffLabels[i].setText(QCoreApplication.translate(
-                'Spoon', u'<html><head/><body><p align=\'center\'><span style=\' font-weight:600;\'>\uc7ac\ub8cc%s</span></p></body></html>' % str(i + 1), None))  # 재료 라벨
+            self.stuffLabels[i].setText('재료%d' % (i + 1))
+            self.stuffLabels[i].setStyleSheet(STYLE_BOLD)
             self.percentLabels[i].setText('%')  # % 기호 라벨
 
-        self.infoBox.setTitle(QCoreApplication.translate(
-            'Spoon', u'\uc815\ubcf4', None))
+        self.infoBox.setTitle('정보')
 
         self.hpLabel.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>HP</span></p></body></html>', None))

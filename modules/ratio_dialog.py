@@ -2,7 +2,7 @@
 from PySide6.QtCore import (QRect, Qt)
 from PySide6.QtGui import (QCursor, QFont)
 from PySide6.QtWidgets import (QLabel, QMainWindow)
-from .preferences_provider import preferences, watcher
+from .preferences_provider import getPreferences, watcher
 
 rangeFont = QFont('Arial', 1)
 
@@ -15,10 +15,7 @@ class RatioDialog(QMainWindow):
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.ratio = currentValue
 
-        self.opacity = preferences.value('ratioDialogOpacity')
-        if not self.opacity:
-            preferences.setValue('ratioDialogOpacity', 70)
-        
+        self.opacity = getPreferences('ratioDialogOpacity')
         self.initUI()
 
     # 새로운 값을 계산 후 반영
@@ -27,18 +24,17 @@ class RatioDialog(QMainWindow):
         sum = 0
         temp = 0
         
-        color = preferences.value('ratioBarColor')
-        self.opacity = preferences.value('ratioDialogOpacity')
-        self.move(preferences.value('ratioDialogDefaultPosition')['x'],
-                  preferences.value('ratioDialogDefaultPosition')['y'])
+        # 설정에서 값 가져오기
+        color = getPreferences('ratioBarColor')
+        self.opacity = getPreferences('ratioDialogOpacity')
+        self.move(getPreferences('ratioDialogDefaultPosition')['x'],
+                  getPreferences('ratioDialogDefaultPosition')['y'])
         self.currentWindowSize = {
-            'width': preferences.value('ratioDialogSize')['width'],
-            'height': preferences.value('ratioDialogSize')['height']
+            'width': getPreferences('ratioDialogSize')['width'],
+            'height': getPreferences('ratioDialogSize')['height']
         }
-        self.move(preferences.value('ratioDialogDefaultPosition')['x'],
-                  preferences.value('ratioDialogDefaultPosition')['y'])
         self.setWindowOpacity(
-            float((preferences.value('ratioDialogOpacity'))) * 0.01)
+            float((getPreferences('ratioDialogOpacity'))) * 0.01)
         self.resize(self.currentWindowSize['width'],
                     self.currentWindowSize['height'])
         self.setFixedSize(
@@ -69,29 +65,24 @@ class RatioDialog(QMainWindow):
 
     # UI 요소 초기화
     def initUI(self):
-        
         self.labels = [
             QLabel('', self),
             QLabel('', self),
             QLabel('', self),
         ]
-
-        for i in range(0, 3):
-            self.labels[i].setFont(rangeFont)
-
+        for label in self.labels:
+            label.setFont(rangeFont)
         watcher.fileChanged.connect(self.draw)
-
         self.draw()
         self.show()
 
     # 마우스 클릭 이벤트
     def mousePressEvent(self, event):
-        print(preferences.value('ratioBarLocked'))
-        if event.button() == Qt.LeftButton and preferences.value('ratioBarLocked') != 'true':
+        if event.button() == Qt.LeftButton and getPreferences('ratioBarLocked') != 'true':
             self.m_flag = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
-            self.setCursor(QCursor(Qt.OpenHandCursor))  # Change mouse icon
+            self.setCursor(QCursor(Qt.OpenHandCursor))
 
     def mouseMoveEvent(self, event):
         if Qt.LeftButton and self.m_flag:

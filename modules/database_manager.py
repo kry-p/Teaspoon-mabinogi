@@ -17,7 +17,6 @@ RECIPE_MILESTONE = {
                         'MINDAM', 'MAXDAM',
                         'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX']
 }
-
 RECIPE_MILESTONE['categoryName'].reverse()
 RECIPE_MILESTONE['categoryColumns'].reverse()
 RECIPE_MILESTONE['categoryCode'].reverse()
