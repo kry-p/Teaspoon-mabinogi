@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+'''
+# Main window for Spoon
+# Made by kry-p
+# https://github.com/kry-p/Teaspoon-mabinogi
+'''
+
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt)
 from PySide6.QtGui import (QAction, QFont, QStandardItem,
@@ -12,11 +18,8 @@ from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 from .preferences_provider import (preferences, watcher, init, getPreferences)
 
-preferences = preferences  # 애플리케이션 설정
-watcher = watcher  # 설정 값 변화 감지
-db = database_manager.DBManager()  # 레시피 데이터베이스
-CATEGORIES = db.getCategories()  # 카테고리 정보
-
+db = database_manager.DBManager()
+CATEGORIES = db.getCategories()
 COLOR_POSITIVE = '#0099FF'
 COLOR_NEGATIVE = '#FF0000'
 STYLE_BOLD = 'font-weight: 600;'

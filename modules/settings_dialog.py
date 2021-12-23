@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+'''
+# Settings window for Spoon
+# Made by kry-p
+# https://github.com/kry-p/Teaspoon-mabinogi
+'''
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt)
 from PySide6.QtGui import (QIntValidator)
@@ -10,14 +15,16 @@ from .elements import Widget
 
 STYLE_BOLD = 'font-weight: 600;'
 
-# 설정 창
+# Settings dialog
 class SettingsDialog(QMainWindow):
     def __init__(self):
         super().__init__()
         self.resize(320, 250)
         self.setFixedSize(QSize(320, 250))
 
-        # 창 설정
+        # Settings for window
+        self.setWindowTitle('설정')
+
         _sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         _sizePolicy.setHorizontalStretch(0)
         _sizePolicy.setVerticalStretch(0)
@@ -29,17 +36,17 @@ class SettingsDialog(QMainWindow):
         self.settingsWidget = QTabWidget(self.centralwidget)
         self.settingsWidget.setGeometry(QRect(10, 10, 301, 191))
 
-        self.barOption = QWidget()  # 비율 바 옵션
-        self.miscOption = QWidget()  # 기타 옵션
+        self.barOption = QWidget()  # ratio bar
+        self.miscOption = QWidget()  # miscellaneous
 
-        # 탭
+        # Tabs
         self.settingsWidget.addTab(self.barOption, "")
         self.settingsWidget.addTab(self.miscOption, "")
         
         self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.barOption), '비율 바')
         self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.miscOption), '기타')
         
-        # 설정 이름 라벨
+        # Name labels for settings
         self.nameLabel = {
             'size': Widget(widget = QLabel(self.barOption), geometry = QRect(50, 20, 41, 20), text = '크기', stylesheet = STYLE_BOLD),
             'position': Widget(widget = QLabel(self.barOption), geometry = QRect(50, 50, 41, 20), text = '위치', stylesheet = STYLE_BOLD),
@@ -50,7 +57,7 @@ class SettingsDialog(QMainWindow):
             'favorites': Widget(widget = QLabel(self.miscOption), geometry = QRect(30, 60, 61, 20), text = '즐겨찾기', stylesheet = STYLE_BOLD),
             'support': Widget(widget = QLabel(self.miscOption), geometry = QRect(30, 110, 61, 20), text = '오류제보', stylesheet = STYLE_BOLD)
         }
-        # 내용 라벨
+        # Description labels for settings
         self.descLabel = {
             'size': Widget(widget = QLabel(self.barOption), geometry = QRect(148, 20, 16, 20), text = 'x'),
             'position': Widget(widget = QLabel(self.barOption), geometry = QRect(148, 50, 16, 20), text = 'x'),
@@ -61,9 +68,9 @@ class SettingsDialog(QMainWindow):
                                                                             \ub0e5\ud14c</span></p><p><span style=\" font-weight:600; color:#555555;\">\
                                                                             \ub514\ucf54 : </span><span style=\" color:#555555;\">Niente#1438</span></p></body></html>",
                                                                             None))}
-        # 입력
+        # Inputs for ratio bar
         self.input = {
-            # 창 크기
+            # size
             'ratioBarWidth': Widget(widget = QLineEdit(self.barOption),
                                     geometry = QRect(100, 20, 41, 20), 
                                     text = str(getPreferences('ratioDialogSize')['width']),
@@ -74,7 +81,7 @@ class SettingsDialog(QMainWindow):
                                      text = str(getPreferences('ratioDialogSize')['height']),
                                      onTextChanged = self.onRatioBarSizeChanged,
                                      validator = QIntValidator(1, 2160)),
-            # 창 위치
+            # position
             'ratioBarXPos': Widget(widget = QLineEdit(self.barOption),
                                    geometry = QRect(100, 50, 41, 20), 
                                    text = str(getPreferences('ratioDialogDefaultPosition')['x']),
@@ -85,7 +92,7 @@ class SettingsDialog(QMainWindow):
                                    text = str(getPreferences('ratioDialogDefaultPosition')['y']),
                                    onTextChanged = self.onRatioBarPositionChanged,
                                    validator = QIntValidator(1, 2160)),
-            # 창 색상
+            # color
             'ratioBarColor0': Widget(widget = QLineEdit(self.barOption),
                                      geometry = QRect(100, 80, 61, 20), 
                                      text = str(getPreferences('ratioBarColor')[0]),
@@ -97,11 +104,11 @@ class SettingsDialog(QMainWindow):
                                      onTextChanged = self.onColorChanged,
                                      inputMask = ("\#HHHHHH")),
         }
-        # 텍스트 입력 가운데 정렬
+        # Centered text
         for key, item in self.input.items():
             item.getWidget().setAlignment(Qt.AlignCenter)
 
-        # 버튼
+        # Buttons
         self.button = {
             'colorSelect0': Widget(widget = QPushButton(self.barOption),
                                    geometry = QRect(170, 75, 61, 30),
@@ -117,7 +124,7 @@ class SettingsDialog(QMainWindow):
                                      onClick = self.onResetFavorites)
         }
 
-        # 라디오 버튼
+        # Radio group (current main window)
         self.radio = {
             'mainWindowMini': Widget(widget = QRadioButton(self.miscOption),
                                      geometry = QRect(110, 20, 51, 21),
@@ -134,7 +141,7 @@ class SettingsDialog(QMainWindow):
         else:
             self.radio['mainWindowMini'].getWidget().setChecked(True)
 
-        # 투명도
+        # Opacity for ratio bar
         self.opacitySlider = QSlider(self.barOption)
         self.opacitySlider.setGeometry(QRect(100, 140, 131, 22))
         self.opacitySlider.setMaximum(100)
@@ -143,31 +150,29 @@ class SettingsDialog(QMainWindow):
         self.opacitySlider.setSliderPosition(float(
             getPreferences('ratioDialogOpacity')))
 
-        # Dialog 버튼
+        # Dialog button
         self.acceptButton = QPushButton(self.centralwidget)
         self.acceptButton.setGeometry(QRect(115, 210, 91, 32))
         self.acceptButton.setText('확인')
         
-        # 기타 액션 지정
+        # Misc. actions
         self.opacitySlider.valueChanged.connect(self.onOpacityChanged)
         self.acceptButton.clicked.connect(self.close)
 
-        # 초깃값 지정
+        # Default value
         self.settingsWidget.setCurrentIndex(0)
         self.acceptButton.setDefault(True)
 
         self.setCentralWidget(self.centralwidget)
-        self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
 
-    # 라디오 버튼 클릭 시
+    ''' --------------- actions --------------- '''
     def onRadioButtonClicked(self):
         if self.radio['mainWindowMini'].getWidget().isChecked():
             preferences.setValue('initialWindowExpanded', False)
         else:
             preferences.setValue('initialWindowExpanded', True)
 
-    # 투명도 변경
     def onOpacityChanged(self):
         preferences.setValue('ratioDialogOpacity', self.opacitySlider.value())
 
@@ -191,7 +196,6 @@ class SettingsDialog(QMainWindow):
                     val['height'] = int(next[idx].text())
         preferences.setValue('ratioDialogSize', val)
 
-    # 비율 바 크기 변경
     def onRatioBarPositionChanged(self):
         val = getPreferences('ratioDialogDefaultPosition')
         widget = [self.input['ratioBarXPos'].getWidget(), 
@@ -204,14 +208,12 @@ class SettingsDialog(QMainWindow):
             val['y'] = int(widget[1].text())
         preferences.setValue('ratioDialogDefaultPosition', val)
 
-    # 색상 변경
     def onColorChanged(self):
         val = getPreferences('ratioBarColor')
         for i in range(len(val)):
             val[i] = self.input['ratioBarColor%d' % i].getWidget().text()
         preferences.setValue('ratioBarColor', val)
 
-    # 컬러피커에서 색 선택
     def onColorPickerOpened0(self):
         pick = QColorDialog.getColor()
         self.input['ratioBarColor0'].getWidget().setText(pick.name())
@@ -220,10 +222,5 @@ class SettingsDialog(QMainWindow):
         pick = QColorDialog.getColor()
         self.input['ratioBarColor1'].getWidget().setText(pick.name())
 
-    # 즐겨찾기 초기화
     def onResetFavorites(self):
         preferences.setValue('favorites', [])
-
-    def retranslateUi(self):
-        self.setWindowTitle(QCoreApplication.translate(
-            "MainWindow", u"\uc124\uc815", None))

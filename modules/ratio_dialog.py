@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+'''
+# Food ratio dialog for Spoon
+# Made by kry-p
+# https://github.com/kry-p/Teaspoon-mabinogi
+'''
 from PySide6.QtCore import (QRect, Qt)
 from PySide6.QtGui import (QCursor, QFont)
 from PySide6.QtWidgets import (QLabel, QMainWindow)
@@ -6,7 +11,7 @@ from .preferences_provider import getPreferences, watcher
 
 rangeFont = QFont('Arial', 1)
 
-# 비율 바 창
+# Ratio bar window
 class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
@@ -18,13 +23,13 @@ class RatioDialog(QMainWindow):
         self.opacity = getPreferences('ratioDialogOpacity')
         self.initUI()
 
-    # 새로운 값을 계산 후 반영
+    # Calculate new ratio and display
     def draw(self):
         list = []
         sum = 0
         temp = 0
         
-        # 설정에서 값 가져오기
+        # Get preferences
         color = getPreferences('ratioBarColor')
         self.opacity = getPreferences('ratioDialogOpacity')
         self.move(getPreferences('ratioDialogDefaultPosition')['x'],
@@ -57,13 +62,12 @@ class RatioDialog(QMainWindow):
 
             temp += list[i]
 
-
-    # 저장된 값을 업데이트
+    # Set new ratio value
     def update(self, newValue):
         self.ratio = newValue
         self.draw()
 
-    # UI 요소 초기화
+    # Initialize UI elements
     def initUI(self):
         self.labels = [
             QLabel('', self),
@@ -76,7 +80,7 @@ class RatioDialog(QMainWindow):
         self.draw()
         self.show()
 
-    # 마우스 클릭 이벤트
+    # Mouse event
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and getPreferences('ratioBarLocked') != 'true':
             self.m_flag = True

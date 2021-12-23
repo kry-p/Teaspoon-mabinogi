@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+'''
+Database wrapper class for Spoon
+using SQLite
+'''
 import sqlite3
 
 DB_PATH = './spoon.db'
@@ -21,16 +26,17 @@ RECIPE_MILESTONE['categoryName'].reverse()
 RECIPE_MILESTONE['categoryColumns'].reverse()
 RECIPE_MILESTONE['categoryCode'].reverse()
 
+# Wrapper class
 class DBManager:
     def __init__(self):
         self.data = sqlite3.connect(DB_PATH)
         self.cursor = self.data.cursor()
 
-    # 사전에 지정된 카테고리 목록
+    # Pre-specified categories
     def getCategories(self):
         return RECIPE_MILESTONE
 
-    # 요리 목록
+    # Foods list
     def getFoods(self, category):
         sql = "SELECT NAME FROM recipe WHERE RANK = '%s'" % category
         self.cursor.execute(sql)
@@ -38,9 +44,9 @@ class DBManager:
 
         return result
 
-    # 요리 정보 가져오기
-    # ingredients: 재료1, 재료2, 재료3
-    # specialEffects: 특수효과
+    # Get list of foods
+    # ingredients: 재료 1, 재료 2, 재료 3
+    # specialEffects: 
     # stats: 스테이터스 효과
     def getFoodInfo(self, food):
         result = {
@@ -51,7 +57,6 @@ class DBManager:
         }
         return result
 
-    # 재료 목록
     def getFoodIngredients(self, food):
         sql = 'SELECT INGREDIENT1, INGREDIENT2, INGREDIENT3\
                FROM recipe\
@@ -83,7 +88,6 @@ class DBManager:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    # 재료 이름으로 검색
     def searchByIngredient(self, ingredient):
         sql = 'SELECT NAME\
                FROM recipe\
@@ -93,7 +97,6 @@ class DBManager:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    # 요리 이름으로 검색    
     def searchByName(self, name):
         sql = 'SELECT NAME\
                FROM recipe\
@@ -101,8 +104,8 @@ class DBManager:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
     
-    # 효과 이름으로 검색 (OR)
     def searchByEffect(self, selected):
+        # OR operation
         constraiants = ''
         for i in range(len(selected)):
             if selected[i]:

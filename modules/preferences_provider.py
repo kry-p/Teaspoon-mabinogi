@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
+'''
+# Preferences provider for Spoon
+# Made by kry-p
+# https://github.com/kry-p/Teaspoon-mabinogi
+'''
 from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
+# Default preferences
 defaultPreferences = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
@@ -34,21 +40,21 @@ paths = [local_path + relative_path]
 watcher = QFileSystemWatcher()
 watcher.addPaths(paths)
 
-# 초기화
+# Initialize
 def init():
-    # 초기 설정 (설정값이 없을 때)
+    # Return default settings when QSettings doesn't have specific props
     for key, value in defaultPreferences.items():
         if not preferences.contains(key):
             preferences.setValue(key, value)
 
-# 설정 값 읽어오기
+# Read from QSettings
 def getPreferences(name):
     pref = preferences.value(name)
 
     if pref:
         return pref
     else:
-        # 값이 없거나 삭제된 경우 방어
+        # If QSettings instance doesn't have specific props
         if defaultPreferences[name]:
             preferences.setValue(name, defaultPreferences[name])
             return defaultPreferences[name]
