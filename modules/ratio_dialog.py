@@ -21,6 +21,8 @@ class RatioDialog(QMainWindow):
         self.ratio = currentValue
 
         self.opacity = getPreferences('ratioDialogOpacity')
+        self.move(getPreferences('ratioDialogDefaultPosition')['x'],
+                  getPreferences('ratioDialogDefaultPosition')['y'])
         self.initUI()
 
     # Calculate new ratio and display
@@ -32,8 +34,6 @@ class RatioDialog(QMainWindow):
         # Get preferences
         color = getPreferences('ratioBarColor')
         self.opacity = getPreferences('ratioDialogOpacity')
-        self.move(getPreferences('ratioDialogDefaultPosition')['x'],
-                  getPreferences('ratioDialogDefaultPosition')['y'])
         self.currentWindowSize = {
             'width': getPreferences('ratioDialogSize')['width'],
             'height': getPreferences('ratioDialogSize')['height']
@@ -64,6 +64,7 @@ class RatioDialog(QMainWindow):
 
     # Set new ratio value
     def update(self, newValue):
+        print('draw')
         self.ratio = newValue
         self.draw()
 
@@ -82,7 +83,8 @@ class RatioDialog(QMainWindow):
 
     # Mouse event
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton and getPreferences('ratioBarLocked') != 'true':
+        ratioBarLocked = getPreferences('ratioBarLocked')
+        if event.button() == Qt.LeftButton and (ratioBarLocked == 'false' or ratioBarLocked == False):
             self.m_flag = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()

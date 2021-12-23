@@ -188,7 +188,7 @@ class SettingsDialog(QMainWindow):
                 reply = QMessageBox.critical(
                     self, '오류', '너비는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
                 if reply == QMessageBox.Ok:
-                    next[idx].setText(str(val['width']))
+                    next[idx].setText(str(val['width'])) if idx == 0 else next[idx].setText(str(val['height']))
             else:
                 if idx == 0:
                     val['width'] = int(next[idx].text())

@@ -55,9 +55,5 @@ def getPreferences(name):
         return pref
     else:
         # If QSettings instance doesn't have specific props
-        if defaultPreferences[name]:
-            preferences.setValue(name, defaultPreferences[name])
-            return defaultPreferences[name]
-        return None
-
+        return defaultPreferences[name]
 

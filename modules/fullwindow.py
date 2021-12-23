@@ -104,17 +104,21 @@ class FullWindow(QMainWindow):
         self.setMenuBar(self.menuBar)
         self.actions = {
             'lockRatio': QAction(self),
+            'changeMode': QAction(self),
             'settings': QAction(self),
             'help': QAction(self)
         }
         self.actions['lockRatio'].setCheckable(True)
         self.actions['lockRatio'].setChecked(
             True if getPreferences('ratioBarLocked') == 'true' else False)
+        self.actions['changeMode'].setEnabled(False)
+        self.actions['help'].setEnabled(False)
 
         self.menuBar.addAction(self.toolsMenu.menuAction())
         self.toolsMenu.addAction(self.actions['lockRatio'])
-        self.toolsMenu.addAction(self.actions['settings'])
+        self.toolsMenu.addAction(self.actions['changeMode'])
         self.toolsMenu.addSeparator()
+        self.toolsMenu.addAction(self.actions['settings'])
         self.toolsMenu.addAction(self.actions['help'])
 
     # 좌측 툴박스
@@ -552,8 +556,9 @@ class FullWindow(QMainWindow):
 
         # 메뉴 바
         self.actions['lockRatio'].setText('비율 바 잠금')
+        self.actions['changeMode'].setText('모드 변경 (공사 중)')
         self.actions['settings'].setText('설정')
-        self.actions['help'].setText('도움말')
+        self.actions['help'].setText('도움말 (공사 중)')
 
         # 비율 섹션
         self.ratioBox.setTitle('비율')
