@@ -53,7 +53,7 @@ if __name__ == "__main__":
     app = QApplication([])
     font = QFont('NanumGothic')
     font.setPointSize(9)
-    if random.randrange(1, 11) == 7:
+    if random.randrange(1, 31) == 7:
         app.setWindowIcon(QIcon(res.icon_alt))
     else:
         app.setWindowIcon(QIcon(res.icon))
