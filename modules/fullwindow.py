@@ -7,8 +7,7 @@
 
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt)
-from PySide6.QtGui import (QAction, QFont, QStandardItem,
-                           QStandardItemModel)
+from PySide6.QtGui import (QAction, QStandardItem, QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
@@ -340,8 +339,9 @@ class FullWindow(QMainWindow):
             else:
                 self.stuffNames[i].setText(ingredients[i])
                 self.stuffRatioInputs[i].setText(str(int(ratio[i])))
-
         self.eftValue.setText('' if special[0] is None else special[0])
+        self.eftValue.setToolTip('효과 없음' if special[1] is None else special[1])
+
         for idx in range(len(statValues)):
             val = stats[idx]
 

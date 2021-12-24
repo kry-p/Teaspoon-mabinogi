@@ -135,6 +135,8 @@ class SettingsDialog(QMainWindow):
                                      text = '확장',
                                      onClick = self.onRadioButtonClicked)
         }
+        for key, item in self.radio.items():
+            item.getWidget().setEnabled(False)  # For not implemented feature
 
         if getPreferences('initialWindowExpanded') == 'true':
             self.radio['mainWindowFull'].getWidget().setChecked(True)

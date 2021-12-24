@@ -72,7 +72,7 @@ class DBManager:
         return self.cursor.fetchall()
 
     def getFoodSfx(self, food):
-        sql = 'SELECT SPECIALFX\
+        sql = 'SELECT SPECIALFX, SFXDESC\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
         self.cursor.execute(sql)
