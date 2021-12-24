@@ -16,7 +16,6 @@ class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
         self.m_flag = False
-        
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.ratio = currentValue
 
@@ -64,7 +63,6 @@ class RatioDialog(QMainWindow):
 
     # Set new ratio value
     def update(self, newValue):
-        print('draw')
         self.ratio = newValue
         self.draw()
 
@@ -77,7 +75,6 @@ class RatioDialog(QMainWindow):
         ]
         for label in self.labels:
             label.setFont(rangeFont)
-        watcher.fileChanged.connect(self.draw)
         self.draw()
         self.show()
 

@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
     try:
         os.chdir(sys._MEIPASS)
-        print(sys._MEIPASS)
     except:
         os.chdir(os.getcwd())
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)

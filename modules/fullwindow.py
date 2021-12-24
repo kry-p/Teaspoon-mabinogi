@@ -83,6 +83,10 @@ class FullWindow(QMainWindow):
             if len(favorites) == 0:
                 self.favorites = []
                 self.updateFavoriteList()
+        if self.ratioDialog is not None:
+            data = list(map(lambda value: 0 if value.text() ==
+                        '' else int(value.text()), self.stuffRatioInputs))
+            self.ratioDialog.update(data)
 
     """ ********** UI ********** """
     def setWindow(self):
