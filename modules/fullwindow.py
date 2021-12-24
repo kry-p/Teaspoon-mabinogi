@@ -13,7 +13,9 @@ from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
                                QTabWidget, QWidget)
-from . import (database_manager)
+
+from modules.elements import Widget
+from . import database_manager
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 from .preferences_provider import (preferences, watcher, init, getPreferences)
@@ -24,7 +26,7 @@ COLOR_POSITIVE = '#0099FF'
 COLOR_NEGATIVE = '#FF0000'
 STYLE_BOLD = 'font-weight: 600;'
 
-# 메인 윈도우
+# Main window (Full)
 class FullWindow(QMainWindow):
     def __init__(self, version):
         super().__init__()
@@ -37,26 +39,26 @@ class FullWindow(QMainWindow):
         self.currentFood = getPreferences('currentFood')
         self.favorites = [] if getPreferences('favorites')['item'] is None else getPreferences('favorites')['item']
 
-        self.setWindow()  # 윈도우 기본 설정
-        self.createMenuBar()  # 메뉴 바
-        self.createStuffBox()  # 비율 박스
-        self.createInfoBox()  # 요리 정보 박스
-        self.createLeftToolBox()  # 왼쪽 툴박스
+        self.setWindow()  # Settings for window
+        self.createMenuBar()  # Menu bar
+        self.createStuffBox()  # Stuff ratio box
+        self.createInfoBox()  # Information box
+        self.createLeftToolBox()  # Left toolbox
 
-        # 기타 버튼
+        # Misc. buttons
         self.ratioBarButton = QPushButton(self.mainWidget)
         self.ratioBarButton.setGeometry(QRect(9, 280, 201, 31))
 
         self.setCentralWidget(self.mainWidget)
         self.selectorWidget.setCurrentIndex(0)
 
-        # 액션
-        self.ratioBarButton.clicked.connect(self.openCloseRatioDialog)
+        # Actions
+        self.ratioBarButton.clicked.connect(self.toggleOpenRatioDialog)
         self.recipeListView.doubleClicked.connect(self.listAddToFavorites)
         self.searchListView.doubleClicked.connect(self.searchAddToFavorites)
         self.actions['settings'].triggered.connect(self.openSettingsDialog)
         self.actions['lockRatio'].triggered.connect(self.toggleLockRatioBar)
-        self.rankComboBox.currentIndexChanged.connect(self.changeCategory)
+        self.rankComboBox.currentIndexChanged.connect(self.onChangeCategory)
         self.recipeListSelectionModel.currentChanged.connect(
             self.onRecipeListViewValueChanged)
         self.searchListSelectionModel.currentChanged.connect(
@@ -74,9 +76,9 @@ class FullWindow(QMainWindow):
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
 
-    # 설정 파일 내용 바뀔 시
+    # If QSettings file has changed
     def onFileChanged(self):
-        # 즐겨찾기 초기화 감지
+        # Detects 
         favorites = getPreferences('favorites')['item']
         if favorites is not None:
             if len(favorites) == 0:
@@ -84,7 +86,6 @@ class FullWindow(QMainWindow):
                 self.updateFavoriteList()
 
     """ ********** UI ********** """
-    # 창 기본 설정
     def setWindow(self):
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -96,7 +97,6 @@ class FullWindow(QMainWindow):
         self.setFixedSize(QSize(520, 340))
         self.mainWidget = QWidget(self)
 
-    # 메뉴 바
     def createMenuBar(self):
         self.menuBar = QMenuBar(self)
         self.menuBar.setGeometry(QRect(0, 0, 520, 24))
@@ -121,7 +121,6 @@ class FullWindow(QMainWindow):
         self.toolsMenu.addAction(self.actions['settings'])
         self.toolsMenu.addAction(self.actions['help'])
 
-    # 좌측 툴박스
     def createLeftToolBox(self):
         self.selectorWidget = QTabWidget(self.mainWidget)
         self.selectorWidget.setGeometry(QRect(10, 10, 201, 271))
@@ -194,9 +193,7 @@ class FullWindow(QMainWindow):
         self.selectorWidget.addTab(self.searchMenu, '')
         self.selectorWidget.addTab(self.favoriteMenu, '')
 
-    # 비율 박스
     def createStuffBox(self):
-        # 비율 입력 박스
         self.ratioBox = QGroupBox(self.mainWidget)
         self.ratioBox.setGeometry(QRect(215, 10, 295, 121))
 
@@ -222,7 +219,6 @@ class FullWindow(QMainWindow):
                 QRect(215, 30 + i * 30, 41, 20))
             self.stuffRatioInputs[i].setEnabled(False) 
 
-    # 정보 박스
     def createInfoBox(self):
         self.infoBox = QGroupBox(self.mainWidget)
         self.infoBox.setGeometry(QRect(215, 130, 295, 181))
@@ -232,107 +228,84 @@ class FullWindow(QMainWindow):
         self.createAtkBox()
         self.createDefBox()
 
-    # HP, MP, SP 박스
     def createChrBox(self):
         self.chrBox = QGroupBox(self.infoBox)
         self.chrBox.setGeometry(QRect(10, 20, 275, 31))
 
-        self.hpLabel = QLabel(self.chrBox)
-        self.hpLabel.setGeometry(QRect(10, 10, 31, 16))
-        self.hpValue = QLabel(self.chrBox)
-        self.hpValue.setGeometry(QRect(40, 10, 31, 16))
+        self.chrLabel = [        
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(10, 10, 31, 16), text = 'HP', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(105, 10, 31, 16), text = 'MP', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(200, 10, 31, 16), text = 'SP', stylesheet = STYLE_BOLD)
+        ]
+        self.chrValue = [
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(40, 10, 31, 16)),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(135, 10, 31, 16)),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(230, 10, 31, 16))        
+        ]
 
-        self.mpLabel = QLabel(self.chrBox)
-        self.mpLabel.setGeometry(QRect(105, 10, 31, 16))
-        self.mpValue = QLabel(self.chrBox)
-        self.mpValue.setGeometry(QRect(135, 10, 31, 16))
-
-        self.spLabel = QLabel(self.chrBox)
-        self.spLabel.setGeometry(QRect(200, 10, 31, 16))
-        self.spValue = QLabel(self.chrBox)
-        self.spValue.setGeometry(QRect(230, 10, 31, 16))
-
-    # 기초 스테이터스 박스
     def createStatBox(self):
         self.statBox = QGroupBox(self.infoBox)
         self.statBox.setGeometry(QRect(10, 60, 86, 111))
 
-        self.strLabel = QLabel(self.statBox)
-        self.strLabel.setGeometry(QRect(10, 10, 31, 16))
-        self.strValue = QLabel(self.statBox)
-        self.strValue.setGeometry(QRect(40, 10, 31, 16))
-        self.intLabel = QLabel(self.statBox)
-        self.intLabel.setGeometry(QRect(10, 30, 31, 16))
-        self.intValue = QLabel(self.statBox)
-        self.intValue.setGeometry(QRect(40, 30, 31, 16))
-        self.lucLabel = QLabel(self.statBox)
-        self.lucLabel.setGeometry(QRect(10, 90, 31, 16))
-        self.lucValue = QLabel(self.statBox)
-        self.lucValue.setGeometry(QRect(40, 90, 31, 16))
-        self.wilLabel = QLabel(self.statBox)
-        self.wilLabel.setGeometry(QRect(10, 70, 31, 16))
-        self.wilValue = QLabel(self.statBox)
-        self.wilValue.setGeometry(QRect(40, 70, 31, 16))
-        self.dexLabel = QLabel(self.statBox)
-        self.dexLabel.setGeometry(QRect(10, 50, 31, 16))
-        self.dexValue = QLabel(self.statBox)
-        self.dexValue.setGeometry(QRect(40, 50, 31, 16))
+        self.statLabel = [
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 10, 31, 16), text = '체력', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 30, 31, 16), text = '지력', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 50, 31, 16), text = '솜씨', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 70, 31, 16), text = '의지', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 90, 31, 16), text = '행운', stylesheet = STYLE_BOLD)
+        ]
+        self.statValue = [
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 10, 31, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 30, 31, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 50, 31, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 70, 31, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 90, 31, 16)),
+        ]
 
-    # 방어 스테이터스 박스
     def createDefBox(self):
         self.defBox = QGroupBox(self.infoBox)
         self.defBox.setGeometry(QRect(105, 60, 85, 111))
 
-        self.mdfLabel = QLabel(self.defBox)
-        self.mdfLabel.setGeometry(QRect(10, 63, 31, 16))
-        self.mdfValue = QLabel(self.defBox)
-        self.mdfValue.setGeometry(QRect(40, 63, 31, 16))
-        self.defLabel = QLabel(self.defBox)
-        self.defLabel.setGeometry(QRect(10, 10, 31, 16))
-        self.defValue = QLabel(self.defBox)
-        self.defValue.setGeometry(QRect(40, 10, 31, 16))
-        self.mptLabel = QLabel(self.defBox)
-        self.mptLabel.setGeometry(QRect(10, 90, 31, 16))
-        self.mptValue = QLabel(self.defBox)
-        self.mptValue.setGeometry(QRect(40, 90, 31, 16))
-        self.prtLabel = QLabel(self.defBox)
-        self.prtLabel.setGeometry(QRect(10, 37, 31, 16))
-        self.prtValue = QLabel(self.defBox)
-        self.prtValue.setGeometry(QRect(40, 37, 31, 16))
+        self.defLabel = [
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 10, 31, 16), text = '방어', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 37, 31, 16), text = '보호', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 63, 31, 16), text = '마방', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 90, 31, 16), text = '마보', stylesheet = STYLE_BOLD),
+        ]
 
-    # 공격 스테이터스 박스
+        self.defValue = [
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 10, 31, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 37, 31, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 63, 31, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 90, 31, 16)),
+        ]
+    
     def createAtkBox(self):
         self.atkBox = QGroupBox(self.infoBox)
-        self.atkBox.setStyleSheet(
-            'padding: 0px 0px 0px 0px; margin: 0px 0px 0px 0px;')
         self.atkBox.setGeometry(QRect(199, 60, 86, 111))
+
+        self.atkLabel = [
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 10, 31, 16), text = '민댐', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 37, 31, 16), text = '맥댐', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 63, 31, 16), text = '마공', stylesheet = STYLE_BOLD),
+        ]
+
+        self.atkValue = [
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 10, 31, 16)),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 37, 31, 16)),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 63, 31, 16)),
+        ]
 
         self.eftLabel = QLabel(self.atkBox)
         self.eftLabel.setGeometry(QRect(10, 90, 31, 16))
         self.eftValue = QLabel(self.atkBox)
         self.eftValue.setGeometry(QRect(40, 90, 31, 16))
-        self.eftValue.setFont(QFont('NanumGothic', 7))
-        self.mtkLabel = QLabel(self.atkBox)
-        self.mtkLabel.setGeometry(QRect(10, 63, 31, 16))
-        self.mtkValue = QLabel(self.atkBox)
-        self.mtkValue.setGeometry(QRect(40, 63, 31, 16))
-
-        self.minDamLabel = QLabel(self.atkBox)
-        self.minDamLabel.setGeometry(QRect(10, 10, 31, 16))
-        self.minDamValue = QLabel(self.atkBox)
-        self.minDamValue.setGeometry(QRect(40, 10, 31, 16))
-        self.maxDamLabel = QLabel(self.atkBox)
-        self.maxDamLabel.setGeometry(QRect(10, 37, 31, 16))
-        self.maxDamValue = QLabel(self.atkBox)
-        self.maxDamValue.setGeometry(QRect(40, 37, 31, 16))
 
     """ ********** 액션 ********** """
-    # 비율 바 잠금
     def toggleLockRatioBar(self):
         preferences.setValue('ratioBarLocked',
                             self.actions['lockRatio'].isChecked())
 
-    # 현재 카테고리의 리스트 가져오기
     def getCurrentCategoryList(self):
         self.recipeListModel.clear()
         currentCategoryItems = db.getFoods(
@@ -343,7 +316,6 @@ class FullWindow(QMainWindow):
             currentItem.setEditable(False)
             self.recipeListModel.appendRow(currentItem)
 
-    # 목록 뷰에서 값이 바뀔 때
     def onRecipeListViewValueChanged(self):
         currentIndex = self.recipeListSelectionModel.currentIndex().row()
 
@@ -352,12 +324,9 @@ class FullWindow(QMainWindow):
             preferences.setValue('currentFood', currentFood)
             self.setFoodInfo(currentFood)
 
-    # 요리 정보를 표시
     def setFoodInfo(self, foodName):
-        statValues = [self.strValue, self.intValue, self.dexValue, self.wilValue, self.lucValue,
-                 self.hpValue, self.mpValue, self.spValue,
-                 self.minDamValue, self.maxDamValue, self.mtkValue,
-                 self.defValue, self.prtValue, self.mdfValue, self.mptValue]
+        statValues = self.statValue + self.chrValue\
+                + self.atkValue + self.defValue
         info = db.getFoodInfo(foodName)
         ingredients = info['ingredients'][0]
         ratio = info['ratio'][0]
@@ -376,20 +345,18 @@ class FullWindow(QMainWindow):
         for idx in range(len(statValues)):
             val = stats[idx]
 
-            if val is not None:
-                statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
-                if int(val) > 0:
-                    statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
-                else:
-                    statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
+            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
+            
+            if val is not None and int(val) > 0:
+                statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
+            else:
+                statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
 
-    # 설정 창 열기
     def openSettingsDialog(self, food):
         if self.settingsDialog is None:
             self.settingsDialog = SettingsDialog()
         self.settingsDialog.show()
 
-    # 즐겨찾기에 추가 (목록)
     def listAddToFavorites(self):
         currentIndex = self.recipeListSelectionModel.currentIndex().row()
         if currentIndex != -1:
@@ -399,7 +366,6 @@ class FullWindow(QMainWindow):
             preferences.setValue('favorites', {'item': self.favorites})
             self.updateFavoriteList()
 
-    # 즐겨찾기에 추가 (검색)
     def searchAddToFavorites(self):
         currentIndex = self.searchListSelectionModel.currentIndex().row()
         if currentIndex != -1:
@@ -411,7 +377,6 @@ class FullWindow(QMainWindow):
             })
             self.updateFavoriteList()
 
-    # 즐겨챶기 뷰에서 선택된 요리가 바뀔 때
     def onFavoriteListViewValueChanged(self):
         currentIndex = self.favoriteListSelectionModel.currentIndex().row()
         if currentIndex != -1:
@@ -419,7 +384,6 @@ class FullWindow(QMainWindow):
                 'currentFood', self.favoriteListModel.item(currentIndex, 0).text())
             self.setFoodInfo(self.favoriteListModel.item(currentIndex, 0).text())
 
-    # 검색 뷰에서 선택된 요리가 바뀔 때
     def onSearchListViewValueChanged(self):
         currentIndex = self.searchListSelectionModel.currentIndex().row()
         if currentIndex != -1:
@@ -428,7 +392,6 @@ class FullWindow(QMainWindow):
                 'currentFood', currentFood)
             self.setFoodInfo(currentFood)
 
-    # 즐겨찾기 목록 가져오기
     def updateFavoriteList(self):
         self.favoriteListModel.clear()
 
@@ -438,7 +401,6 @@ class FullWindow(QMainWindow):
                 currentItem.setEditable(False)
                 self.favoriteListModel.appendRow(currentItem)
 
-    # 선택된 즐겨찾기 요리를 위로
     def onChangeFavoriteOrderUp(self):
         currentPos = self.favoriteListSelectionModel.currentIndex().row()
         if currentPos > 0:
@@ -448,7 +410,6 @@ class FullWindow(QMainWindow):
             self.updateFavoriteList()
             self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos - 1, 0))
 
-    # 선택된 즐겨찾기 요리를 아래로
     def onChangeFavoriteOrderDown(self):
         currentPos = self.favoriteListSelectionModel.currentIndex().row()
 
@@ -459,7 +420,6 @@ class FullWindow(QMainWindow):
             self.updateFavoriteList()
             self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos + 1, 0))
 
-    # 선택된 즐겨찾기 요리 삭제
     def deleteSelectedFavorite(self):
         currentPos = self.favoriteListSelectionModel.currentIndex().row()
         if currentPos != -1:
@@ -469,7 +429,6 @@ class FullWindow(QMainWindow):
                 'item':self.favorites
             })
 
-    # 검색
     def search(self):
         currentText = self.searchInput.text()
         currentEnabled = -1
@@ -517,14 +476,12 @@ class FullWindow(QMainWindow):
                     currentItem.setEditable(False)
                     self.searchListModel.appendRow(currentItem)
                 
-    # 현재 카테고리 변경
-    def changeCategory(self):
+    def onChangeCategory(self):
         preferences.setValue('currentCategoryIndex',
                           self.rankComboBox.currentIndex())
         self.getCurrentCategoryList()
 
-    # 비율 바 열기 / 닫기
-    def openCloseRatioDialog(self):
+    def toggleOpenRatioDialog(self):
         data = list(map(lambda value: 0 if value.text() ==
                         '' else int(value.text()), self.stuffRatioInputs))
         test = sum(data)
@@ -535,81 +492,39 @@ class FullWindow(QMainWindow):
                 self.ratioDialog.close()
             self.ratioDialog = None
 
-    # 종료 시
     def closeEvent(self, event):
         if self.ratioDialog:
             self.ratioDialog.close()
         if self.settingsDialog:
             self.settingsDialog.close()
     
-    # 키 이벤트
     def keyPressEvent(self, event):
-        # Enter 버튼을 누를 때 검색
+        # If return button pressed
         if self.selectorWidget.currentIndex() == 1:
             if event.key() == Qt.Key_Return:
                 self.searchButton.click()
 
-    # 텍스트 지정
     def retranslateUi(self):
-        # 제목
         self.setWindowTitle('Spoon %s' % self.version)
 
-        # 메뉴 바
         self.actions['lockRatio'].setText('비율 바 잠금')
         self.actions['changeMode'].setText('모드 변경 (공사 중)')
         self.actions['settings'].setText('설정')
         self.actions['help'].setText('도움말 (공사 중)')
 
-        # 비율 섹션
         self.ratioBox.setTitle('비율')
         
-        # 검색
         self.nameRadio.setText('이름')
         self.effectRadio.setText('효과')
         self.stuffRadio.setText('재료')
         self.searchButton.setText('검색')
 
-        # 재료 라벨
         for i in range(0, 3):
             self.stuffLabels[i].setText('재료%d' % (i + 1))
             self.stuffLabels[i].setStyleSheet(STYLE_BOLD)
-            self.percentLabels[i].setText('%')  # % 기호 라벨
+            self.percentLabels[i].setText('%') 
 
         self.infoBox.setTitle('정보')
-
-        self.hpLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>HP</span></p></body></html>', None))
-        self.mpLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>MP</span></p></body></html>', None))
-        self.spLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>SP</span></p></body></html>', None))
-
-        self.strLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\uccb4\ub825</span></p></body></html>', None))
-        self.lucLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ud589\uc6b4</span></p></body></html>', None))
-        self.intLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\uc9c0\ub825</span></p></body></html>', None))
-        self.wilLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\uc758\uc9c0</span></p></body></html>', None))
-        self.dexLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\uc19c\uc528</span></p></body></html>', None))
-
-        self.mdfLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ub9c8\ubc29</span></p></body></html>', None))
-        self.defLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ubc29\uc5b4</span></p></body></html>', None))
-        self.mptLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ub9c8\ubcf4</span></p></body></html>', None))
-        self.prtLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ubcf4\ud638</span></p></body></html>', None))
-
-        self.minDamLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ubbfc\ub310</span></p></body></html>', None))
-        self.maxDamLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ub9e5\ub310</span></p></body></html>', None))
-        self.mtkLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ub9c8\uacf5</span></p></body></html>', None))
         self.eftLabel.setText(QCoreApplication.translate(
             'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ud6a8\uacfc</span></p></body></html>', None))
 

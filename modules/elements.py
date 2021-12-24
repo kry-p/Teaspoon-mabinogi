@@ -27,6 +27,11 @@ class Widget():
         if "onClick" in kwargs:
             self.widget.clicked.connect(self.prop['onClick'])
 
+    def setText(self, text):
+        self.widget.setText(text)
+
+    def setStyleSheet(self, style):
+        self.widget.setStyleSheet(style)
 
     def getWidget(self):
         return self.widget

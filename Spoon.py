@@ -13,7 +13,7 @@ from modules.fullwindow import FullWindow
 from modules.preferences_provider import preferences
 
 
-APP_VERSION = 'v0.1.2.1'
+APP_VERSION = 'v0.1.3'
 
 # from modules import window
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # window = QStackedWidget()
     # window.setWindowTitle('Spoon')
 
-    # # 스택 순서 변경
+    # # Change UI stack order
     # if preferences.value('initialWIndowExpanded') == 'false':
     #     window.addWidget(FullWindow())
     #     window.addWidget(MiniWindow())
