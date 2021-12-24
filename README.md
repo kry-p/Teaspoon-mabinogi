@@ -32,7 +32,7 @@ pip install PySide6
 4. ```Spoon.py``` 파일을 실행합니다.
 
 ## 알려진 문제
-- 설정에서 즐겨찾기를 초기화하였을 때 실제 초기화된 내용이 즉시 반영되지 않음
+- 
 
 ## FAQ - ⚠ 문제가 있으면 여기부터 읽어 주세요 ⚠
 
@@ -54,10 +54,9 @@ This application failed to start because no Qt platform plugin could be initiali
 
   위 조치 후에도 문제가 발생하는 경우 개발자에게 문의해 주세요.
  
-+ 설정 강제 초기화는 어떻게 하나요?  
-  [Releases 페이지](https://github.com/kry-p/Teaspoon-mabinogi/releases)에서 Reset.exe 파일을 다운로드 후 실행합니다.
-  
-  콘솔 창에서 초기화에 동의하면 초기화 작업이 진행됩니다.
++ 설정 백업이나 초기화는 어떻게 하나요?    
+  ```(사용자)/AppData/Local/Yuzu``` 경로에 ```settings.ini``` 파일이 있습니다.  
+  이 파일을 백업하거나 삭제하시면 됩니다.
 
 
 ## QnA
@@ -68,9 +67,9 @@ This application failed to start because no Qt platform plugin could be initiali
 
 ## 🚧 Todos 🚧
 
- + 레시피 목록 구현
- + 즐겨찾기 기능 구현
  + 설정 저장 / 불러오기, 초기화 기능 구현
+ + 미니 모드 및 모드 전환 기능 구현
+ + 레시피 재료 클릭 시 해당 재료의 레시피나 구매처를 
 
 ## 라이선스
 이 애드온 프로그램은 LGPL 라이선스 하에 사용 가능합니다.
