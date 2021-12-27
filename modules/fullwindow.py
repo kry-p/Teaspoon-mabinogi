@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # Main window for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 
@@ -215,11 +214,12 @@ class FullWindow(QMainWindow):
         ]
 
         for i in range(0, 3):
-            self.stuffLabels[i].setGeometry(QRect(10, 30 + i * 30, 41, 20))
-            self.stuffNames[i].setGeometry(QRect(60, 30 + i * 30, 121, 20))
-            self.percentLabels[i].setGeometry(QRect(260, 30 + i * 30, 21, 20))
+            self.stuffLabels[i].setGeometry(QRect(10, 29 + i * 30, 41, 20))
+            self.stuffNames[i].setGeometry(QRect(60, 29 + i * 30, 121, 20))
+            self.percentLabels[i].setGeometry(QRect(260, 29 + i * 30, 21, 20))
             self.stuffRatioInputs[i].setGeometry(
-                QRect(215, 30 + i * 30, 41, 20))
+                QRect(215, 29 + i * 30, 41, 20))
+            self.stuffRatioInputs[i].setAlignment(Qt.AlignRight)
             self.stuffRatioInputs[i].setEnabled(False) 
 
     def createInfoBox(self):
@@ -231,19 +231,24 @@ class FullWindow(QMainWindow):
         self.createAtkBox()
         self.createDefBox()
 
+        values = self.statValue + self.defValue + self.atkValue + [self.eftValue]
+
+        for i in values:
+            i.getWidget().setAlignment(Qt.AlignRight)
+
     def createChrBox(self):
         self.chrBox = QGroupBox(self.infoBox)
         self.chrBox.setGeometry(QRect(10, 20, 275, 31))
 
         self.chrLabel = [        
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(10, 10, 31, 16), text = 'HP', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(105, 10, 31, 16), text = 'MP', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(200, 10, 31, 16), text = 'SP', stylesheet = STYLE_BOLD)
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(10, 6, 31, 16), text = 'HP', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(105, 6, 31, 16), text = 'MP', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(200, 6, 31, 16), text = 'SP', stylesheet = STYLE_BOLD)
         ]
         self.chrValue = [
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(40, 10, 31, 16)),
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(135, 10, 31, 16)),
-            Widget(widget = QLabel(self.chrBox), geometry = QRect(230, 10, 31, 16))        
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(40, 6, 31, 16)),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(135, 6, 31, 16)),
+            Widget(widget = QLabel(self.chrBox), geometry = QRect(230, 6, 31, 16))        
         ]
 
     def createStatBox(self):
@@ -251,18 +256,18 @@ class FullWindow(QMainWindow):
         self.statBox.setGeometry(QRect(10, 60, 86, 111))
 
         self.statLabel = [
-            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 10, 31, 16), text = '체력', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 30, 31, 16), text = '지력', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 50, 31, 16), text = '솜씨', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 70, 31, 16), text = '의지', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 90, 31, 16), text = '행운', stylesheet = STYLE_BOLD)
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 6, 31, 16), text = '체력', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 26, 31, 16), text = '지력', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 46, 31, 16), text = '솜씨', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 66, 31, 16), text = '의지', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(10, 86, 31, 16), text = '행운', stylesheet = STYLE_BOLD)
         ]
         self.statValue = [
-            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 10, 31, 16)),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 30, 31, 16)),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 50, 31, 16)),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 70, 31, 16)),
-            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 90, 31, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 7, 34, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 27, 34, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 47, 34, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 67, 34, 16)),
+            Widget(widget = QLabel(self.statBox), geometry = QRect(40, 87, 34, 16)),
         ]
 
     def createDefBox(self):
@@ -270,17 +275,17 @@ class FullWindow(QMainWindow):
         self.defBox.setGeometry(QRect(105, 60, 85, 111))
 
         self.defLabel = [
-            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 10, 31, 16), text = '방어', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 37, 31, 16), text = '보호', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 63, 31, 16), text = '마방', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 90, 31, 16), text = '마보', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 6, 31, 16), text = '방어', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 33, 31, 16), text = '보호', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 59, 31, 16), text = '마방', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(10, 86, 31, 16), text = '마보', stylesheet = STYLE_BOLD),
         ]
 
         self.defValue = [
-            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 10, 31, 16)),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 37, 31, 16)),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 63, 31, 16)),
-            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 90, 31, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 7, 34, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 34, 34, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 60, 34, 16)),
+            Widget(widget = QLabel(self.defBox), geometry = QRect(40, 87, 34, 16)),
         ]
     
     def createAtkBox(self):
@@ -288,21 +293,20 @@ class FullWindow(QMainWindow):
         self.atkBox.setGeometry(QRect(199, 60, 86, 111))
 
         self.atkLabel = [
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 10, 31, 16), text = '민댐', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 37, 31, 16), text = '맥댐', stylesheet = STYLE_BOLD),
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 63, 31, 16), text = '마공', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 6, 31, 16), text = '민댐', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 33, 31, 16), text = '맥댐', stylesheet = STYLE_BOLD),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(10, 59, 31, 16), text = '마공', stylesheet = STYLE_BOLD),
         ]
 
         self.atkValue = [
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 10, 31, 16)),
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 37, 31, 16)),
-            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 63, 31, 16)),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 7, 34, 16)),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 34, 34, 16)),
+            Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 60, 34, 16)),
         ]
 
         self.eftLabel = QLabel(self.atkBox)
-        self.eftLabel.setGeometry(QRect(10, 90, 31, 16))
-        self.eftValue = QLabel(self.atkBox)
-        self.eftValue.setGeometry(QRect(40, 90, 31, 16))
+        self.eftLabel.setGeometry(QRect(10, 86, 31, 16))
+        self.eftValue = Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 87, 34, 16), stylesheet = STYLE_BOLD)
 
     """ ********** 액션 ********** """
     def toggleLockRatioBar(self):
@@ -343,8 +347,8 @@ class FullWindow(QMainWindow):
             else:
                 self.stuffNames[i].setText(ingredients[i])
                 self.stuffRatioInputs[i].setText(str(int(ratio[i])))
-        self.eftValue.setText('' if special[0] is None else special[0])
-        self.eftValue.setToolTip('효과 없음' if special[1] is None else special[1])
+        self.eftValue.getWidget().setText('' if special[0] is None else special[0])
+        self.eftValue.getWidget().setToolTip('효과 없음' if special[1] is None else special[1])
 
         for idx in range(len(statValues)):
             val = stats[idx]

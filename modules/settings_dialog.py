@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # Settings window for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
@@ -119,7 +118,7 @@ class SettingsDialog(QMainWindow):
                                    text = '선택',
                                    onClick = self.onColorPickerOpened1),
             'resetFavorites': Widget(widget = QPushButton(self.miscOption),
-                                     geometry = QRect(110, 60, 71, 31), 
+                                     geometry = QRect(110, 55, 71, 31), 
                                      text = '초기화',
                                      onClick = self.onResetFavorites)
         }

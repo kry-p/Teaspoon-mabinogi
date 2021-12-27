@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # QWidget wrapper class for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 class Widget():

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # Food ratio dialog for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 from PySide6.QtCore import (QRect, Qt)
@@ -15,6 +14,7 @@ rangeFont = QFont('Arial', 1)
 class RatioDialog(QMainWindow):
     def __init__(self, currentValue):
         super().__init__()
+        self.setWindowTitle('비율')
         self.m_flag = False
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.ratio = currentValue

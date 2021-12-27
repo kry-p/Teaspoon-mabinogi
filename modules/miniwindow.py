@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # Mini window for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 

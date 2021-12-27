@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
 # Preferences provider for Spoon
-# Made by kry-p
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
