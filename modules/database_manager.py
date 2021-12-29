@@ -20,7 +20,10 @@ RECIPE_MILESTONE = {
     'categoryColumns': ['STR', 'INT', 'DEX', 'WIL', 'LUC',
                         'HP', 'MP', 'SP',
                         'MINDAM', 'MAXDAM',
-                        'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX']
+                        'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX'],
+    'npcList': ['케이틴', '글라니스', '고든', '프레이저', '셰나', '루카스', '제니퍼', '에피',
+                '글라니테스', '반스트', '루와이', '피에릭', '글루아스', '카독', '아닉',
+                '바날렌', '배리', '메이드', '교역', '렘 / 람', '마차']
 }
 RECIPE_MILESTONE['categoryName'].reverse()
 RECIPE_MILESTONE['categoryColumns'].reverse()
@@ -32,17 +35,33 @@ class DBManager:
         self.data = sqlite3.connect(DB_PATH)
         self.cursor = self.data.cursor()
 
+    # query
+    def launchQuery(self, sql):
+        try:
+            self.cursor.execute(sql)
+            response =  {
+                'success': True,
+                'result': self.cursor.fetchall()
+            }
+        except sqlite3.Error as e:
+            response = {
+                'success': False,
+                'result': e
+            }
+        finally:
+            if response['success'] is True:
+                return response['result']
+            else:
+                return []
+
     # Pre-specified categories
     def getCategories(self):
         return RECIPE_MILESTONE
 
     # Foods list
     def getFoods(self, category):
-        sql = "SELECT NAME FROM recipe WHERE RANK = '%s'" % category
-        self.cursor.execute(sql)
-        result = list(map(list, self.cursor.fetchall()))
-
-        return result
+        sql = "SELECT NAME, ISEXT FROM recipe WHERE RANK = '%s'" % category
+        return list(map(list, self.launchQuery(sql)))
 
     # Get list of foods
     # ingredients: 재료 1, 재료 2, 재료 3
@@ -61,22 +80,20 @@ class DBManager:
         sql = 'SELECT INGREDIENT1, INGREDIENT2, INGREDIENT3\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
+        
 
     def getFoodRatio(self, food):
         sql = 'SELECT RATIO1, RATIO2, RATIO3\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
 
     def getFoodSfx(self, food):
         sql = 'SELECT SPECIALFX, SFXDESC\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
 
     def getFoodStats(self, food):
         sql = 'SELECT STR, INT, DEX, WIL, LUC,\
@@ -85,24 +102,21 @@ class DBManager:
                       MATK, DEF, PRT, MDEF, MPRT\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
 
     def searchByIngredient(self, ingredient):
-        sql = 'SELECT NAME\
+        sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE INGREDIENT1 LIKE \'%' + ingredient + '%\'\
                   OR INGREDIENT2 LIKE \'%' + ingredient + '%\'\
                   OR INGREDIENT3 LIKE \'%' + ingredient + '%\''
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
 
     def searchByName(self, name):
-        sql = 'SELECT NAME\
+        sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE NAME LIKE \'%' + name + '%\''
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
     
     def searchByEffect(self, selected):
         # OR operation
@@ -116,10 +130,21 @@ class DBManager:
                 else:
                     constraiants += 'OR %s NOT NULL ' % RECIPE_MILESTONE['categoryColumns'][15 - i]
 
-        sql = 'SELECT NAME\
+        sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE %s' % constraiants
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        return self.launchQuery(sql)
 
-        
+    def getRelatedRecipe(self, food):
+        sql = 'SELECT NAME\
+               FROM recipe\
+               WHERE NAME = \'' + food + '\''
+        response = self.launchQuery(sql)
+        return response
+
+    def getRelatedIngredient(self, food):
+        sql = 'SELECT *\
+               FROM ingredient\
+               WHERE NAME = \'' + food + '\''
+        response = self.launchQuery(sql)
+        return response

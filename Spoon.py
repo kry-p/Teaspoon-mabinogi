@@ -13,7 +13,7 @@ from modules.fullwindow import FullWindow
 from modules.preferences_provider import preferences
 
 
-APP_VERSION = 'v0.1.3'
+APP_VERSION = 'v0.2 beta 1'
 
 # from modules import window
 

@@ -5,12 +5,15 @@
 '''
 
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
-                            Qt)
+                            Qt, QObject, Signal, QEvent)
 from PySide6.QtGui import (QAction, QStandardItem, QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
-                               QListView, QMainWindow, QMenu, QMenuBar,
+                               QListView, QMainWindow, QMenu, QMenuBar, QMessageBox,
                                QPushButton, QRadioButton, QSizePolicy,
-                               QTabWidget, QWidget)
+                               QTabWidget, QWidget, QStatusBar)
+
+import time
+import threading
 
 from modules.elements import Widget
 from . import database_manager
@@ -51,12 +54,12 @@ class FullWindow(QMainWindow):
         self.selectorWidget.setCurrentIndex(0)
 
         # Actions
-        self.ratioBarButton.clicked.connect(self.toggleOpenRatioDialog)
+        self.ratioBarButton.clicked.connect(self.toggleRatioDialog)
         self.recipeListView.doubleClicked.connect(self.listAddToFavorites)
         self.searchListView.doubleClicked.connect(self.searchAddToFavorites)
         self.actions['settings'].triggered.connect(self.openSettingsDialog)
         self.actions['lockRatio'].triggered.connect(self.toggleLockRatioBar)
-        self.rankComboBox.currentIndexChanged.connect(self.onChangeCategory)
+        self.rankComboBox.currentIndexChanged.connect(self.changeCategory)
         self.recipeListSelectionModel.currentChanged.connect(
             self.onRecipeListViewValueChanged)
         self.searchListSelectionModel.currentChanged.connect(
@@ -94,10 +97,14 @@ class FullWindow(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(520, 340))
-        self.setMaximumSize(QSize(520, 340))
-        self.setFixedSize(QSize(520, 340))
+        self.setMinimumSize(QSize(520, 364))
+        self.setMaximumSize(QSize(520, 364))
+        self.setFixedSize(QSize(520, 364))
         self.mainWidget = QWidget(self)
+        
+        # Status bar
+        self.statusBar = QStatusBar(self)
+        self.statusBar.setGeometry(QRect(0, 340, 520, 24))
 
     def createMenuBar(self):
         self.menuBar = QMenuBar(self)
@@ -222,6 +229,10 @@ class FullWindow(QMainWindow):
             self.stuffRatioInputs[i].setAlignment(Qt.AlignRight)
             self.stuffRatioInputs[i].setEnabled(False) 
 
+        click(self.stuffNames[0]).connect(lambda : self.onRecipeItemClicked(0))
+        click(self.stuffNames[1]).connect(lambda : self.onRecipeItemClicked(1))
+        click(self.stuffNames[2]).connect(lambda : self.onRecipeItemClicked(2))
+
     def createInfoBox(self):
         self.infoBox = QGroupBox(self.mainWidget)
         self.infoBox.setGeometry(QRect(215, 130, 295, 181))
@@ -231,7 +242,7 @@ class FullWindow(QMainWindow):
         self.createAtkBox()
         self.createDefBox()
 
-        values = self.statValue + self.defValue + self.atkValue + [self.eftValue]
+        values = self.statValue + self.defValue + self.atkValue
 
         for i in values:
             i.getWidget().setAlignment(Qt.AlignRight)
@@ -306,137 +317,41 @@ class FullWindow(QMainWindow):
 
         self.eftLabel = QLabel(self.atkBox)
         self.eftLabel.setGeometry(QRect(10, 86, 31, 16))
-        self.eftValue = Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 87, 34, 16), stylesheet = STYLE_BOLD)
+        self.eftValue = Widget(widget = QLabel(self.atkBox), geometry = QRect(40, 86, 34, 16), stylesheet = STYLE_BOLD)
+        self.eftValue.getWidget().setAlignment(Qt.AlignCenter)
 
-    """ ********** 액션 ********** """
-    def toggleLockRatioBar(self):
-        preferences.setValue('ratioBarLocked',
-                            self.actions['lockRatio'].isChecked())
+    """ ---------- Functions ---------- """
+    # When stuff item selected
+    def onRecipeItemClicked(self, pos):
+        text = self.stuffNames[pos].text().replace(' *', '')
+        relatedIngredient = db.getRelatedIngredient(text)
+        
+        if len(relatedIngredient) == 0:
+            # if no corresponding ingredient found from NPCs
+            # search from recipes
+            relatedRecipe = db.getRelatedRecipe(text)
 
-    def getCurrentCategoryList(self):
-        self.recipeListModel.clear()
-        currentCategoryItems = db.getFoods(
-            CATEGORIES['categoryCode'][self.rankComboBox.currentIndex()])
-
-        for item in currentCategoryItems:
-            currentItem = QStandardItem(item[0])
-            currentItem.setEditable(False)
-            self.recipeListModel.appendRow(currentItem)
-
-    def onRecipeListViewValueChanged(self):
-        currentIndex = self.recipeListSelectionModel.currentIndex().row()
-
-        if currentIndex != -1:
-            currentFood = self.recipeListModel.item(currentIndex, 0).text()
-            preferences.setValue('currentFood', currentFood)
-            self.setFoodInfo(currentFood)
-
-    def setFoodInfo(self, foodName):
-        statValues = self.statValue + self.chrValue\
-                + self.atkValue + self.defValue
-        info = db.getFoodInfo(foodName)
-        ingredients = info['ingredients'][0]
-        ratio = info['ratio'][0]
-        special = info['specialEffects'][0]
-        stats = info['stats'][0]
-
-        for i in range(0, 3):
-            if ingredients[i] is None:
-                self.stuffNames[i].setText('')
-                self.stuffRatioInputs[i].setText('')
+            if len(relatedRecipe) == 0:
+                self.setStatusBarMessage('%s와(과) 연관된 레시피나 판매처가 없습니다.' % text)
             else:
-                self.stuffNames[i].setText(ingredients[i])
-                self.stuffRatioInputs[i].setText(str(int(ratio[i])))
-        self.eftValue.getWidget().setText('' if special[0] is None else special[0])
-        self.eftValue.getWidget().setToolTip('효과 없음' if special[1] is None else special[1])
+                relatedRecipe = relatedRecipe[0][0]
+                self.setFoodInfo(relatedRecipe)
+                self.setStatusBarMessage('%s의 레시피를 표시합니다.' % relatedRecipe)
+        else:
+            relatedIngredient = relatedIngredient[0]
+            # title = '판매처 정보'
+            seller = ''
+            for i in range(0, 21):
+                if relatedIngredient[i + 4] == 1:
+                    seller += CATEGORIES['npcList'][i] + ', '
+            seller = seller[:-2]
+            # msg = relatedIngredient[1] + '\n\n분류 : ' + relatedIngredient[3] + \
+            #      '\n가격 : ' + str(relatedIngredient[2]) + 'Gold' + '\n판매처 : ' + seller
+            # self.setStatusBarMessage('%s의 상세정보를 표시합니다.' % text)
+            # msgBox = QMessageBox.information(self, title, msg)
+            self.setStatusBarMessage(text + ' 판매처 : ' + seller)
 
-        for idx in range(len(statValues)):
-            val = stats[idx]
-
-            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
-            
-            if val is not None and int(val) > 0:
-                statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
-            else:
-                statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
-
-    def openSettingsDialog(self, food):
-        if self.settingsDialog is None:
-            self.settingsDialog = SettingsDialog()
-        self.settingsDialog.show()
-
-    def listAddToFavorites(self):
-        currentIndex = self.recipeListSelectionModel.currentIndex().row()
-        if currentIndex != -1:
-            selected = self.recipeListModel.item(currentIndex, 0).text()
-            self.favorites.append(selected)
-            self.favorites = list(dict.fromkeys(self.favorites))
-            preferences.setValue('favorites', {'item': self.favorites})
-            self.updateFavoriteList()
-
-    def searchAddToFavorites(self):
-        currentIndex = self.searchListSelectionModel.currentIndex().row()
-        if currentIndex != -1:
-            selected = self.searchListModel.item(currentIndex, 0).text()
-            self.favorites.append(selected)
-            self.favorites = list(dict.fromkeys(self.favorites))
-            preferences.setValue('favorites', {
-                'item': self.favorites
-            })
-            self.updateFavoriteList()
-
-    def onFavoriteListViewValueChanged(self):
-        currentIndex = self.favoriteListSelectionModel.currentIndex().row()
-        if currentIndex != -1:
-            preferences.setValue(
-                'currentFood', self.favoriteListModel.item(currentIndex, 0).text())
-            self.setFoodInfo(self.favoriteListModel.item(currentIndex, 0).text())
-
-    def onSearchListViewValueChanged(self):
-        currentIndex = self.searchListSelectionModel.currentIndex().row()
-        if currentIndex != -1:
-            currentFood = self.searchListModel.item(currentIndex, 0).text()
-            preferences.setValue(
-                'currentFood', currentFood)
-            self.setFoodInfo(currentFood)
-
-    def updateFavoriteList(self):
-        self.favoriteListModel.clear()
-
-        if self.favorites is not None:
-            for item in self.favorites:
-                currentItem = QStandardItem(item)
-                currentItem.setEditable(False)
-                self.favoriteListModel.appendRow(currentItem)
-
-    def onChangeFavoriteOrderUp(self):
-        currentPos = self.favoriteListSelectionModel.currentIndex().row()
-        if currentPos > 0:
-            temp = self.favorites[currentPos - 1]
-            self.favorites[currentPos - 1] = self.favorites[currentPos]
-            self.favorites[currentPos] = temp
-            self.updateFavoriteList()
-            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos - 1, 0))
-
-    def onChangeFavoriteOrderDown(self):
-        currentPos = self.favoriteListSelectionModel.currentIndex().row()
-
-        if currentPos != -1 and currentPos < (len(self.favorites) - 1):
-            temp = self.favorites[currentPos + 1]
-            self.favorites[currentPos + 1] = self.favorites[currentPos]
-            self.favorites[currentPos] = temp
-            self.updateFavoriteList()
-            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos + 1, 0))
-
-    def deleteSelectedFavorite(self):
-        currentPos = self.favoriteListSelectionModel.currentIndex().row()
-        if currentPos != -1:
-            self.favorites.pop(currentPos)
-            self.updateFavoriteList()
-            preferences.setValue('favorites', {
-                'item':self.favorites
-            })
-
+    # Search
     def search(self):
         currentText = self.searchInput.text()
         currentEnabled = -1
@@ -480,16 +395,73 @@ class FullWindow(QMainWindow):
                 
             if result is not None:
                 for item in result:
-                    currentItem = QStandardItem(item[0])
+                    currentItem = QStandardItem(item[0] + (' *' if item[1] == 1 else ''))
                     currentItem.setEditable(False)
                     self.searchListModel.appendRow(currentItem)
-                
-    def onChangeCategory(self):
-        preferences.setValue('currentCategoryIndex',
-                          self.rankComboBox.currentIndex())
-        self.getCurrentCategoryList()
+    
+    # Set status bar message
+    def setStatusBarMessage(self, message):
+        self.statusBar.showMessage(message)
+        # # Display message for 15 sec.
+        # def work(message):
+        #     self.statusBar.showMessage(message)
+        #     time.sleep(15)
+        #     self.statusBar.showMessage('')
 
-    def toggleOpenRatioDialog(self):
+        # thread = threading.Thread(target = work, args = (message, ))
+        # thread.start()
+
+    """ ----------- Actions ----------- """
+    # UI elements
+    def toggleLockRatioBar(self):
+        preferences.setValue('ratioBarLocked',
+                            self.actions['lockRatio'].isChecked())
+
+    def getCurrentCategoryList(self):
+        self.recipeListModel.clear()
+        currentCategoryItems = db.getFoods(
+            CATEGORIES['categoryCode'][self.rankComboBox.currentIndex()])
+
+        for item in currentCategoryItems:
+            currentItem = QStandardItem(item[0] + (' *' if item[1] == 1 else ''))
+            currentItem.setEditable(False)
+            self.recipeListModel.appendRow(currentItem)
+
+    def setFoodInfo(self, foodName):
+        statValues = self.statValue + self.chrValue\
+                + self.atkValue + self.defValue
+        info = db.getFoodInfo(foodName)
+        ingredients = info['ingredients'][0]
+        ratio = info['ratio'][0]
+        special = info['specialEffects'][0]
+        stats = info['stats'][0]
+
+        for i in range(0, 3):
+            if ingredients[i] is None:
+                self.stuffNames[i].setText('')
+                self.stuffRatioInputs[i].setText('')
+            else:
+                self.stuffNames[i].setText(ingredients[i])
+                self.stuffRatioInputs[i].setText(str(int(ratio[i])))
+        self.eftValue.getWidget().setText('' if special[0] is None else special[0])
+        self.eftValue.getWidget().setToolTip('효과 없음' if special[1] is None else special[1])
+
+        for idx in range(len(statValues)):
+            val = stats[idx]
+
+            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
+            
+            if val is not None and int(val) > 0:
+                statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
+            else:
+                statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
+
+    def openSettingsDialog(self, food):
+        if self.settingsDialog is None:
+            self.settingsDialog = SettingsDialog()
+        self.settingsDialog.show()
+
+    def toggleRatioDialog(self):
         data = list(map(lambda value: 0 if value.text() ==
                         '' else int(value.text()), self.stuffRatioInputs))
         test = sum(data)
@@ -500,6 +472,100 @@ class FullWindow(QMainWindow):
                 self.ratioDialog.close()
             self.ratioDialog = None
 
+    # Categories
+    def changeCategory(self):
+        preferences.setValue('currentCategoryIndex',
+                          self.rankComboBox.currentIndex())
+        self.getCurrentCategoryList()
+
+    def onRecipeListViewValueChanged(self):
+        currentIndex = self.recipeListSelectionModel.currentIndex().row()
+
+        if currentIndex != -1:
+            currentFood = self.recipeListModel.item(currentIndex, 0).text()
+            preferences.setValue('currentFood', currentFood)
+            self.setFoodInfo(currentFood.replace(' *', ''))
+
+
+    # Search
+    def searchAddToFavorites(self):
+        currentIndex = self.searchListSelectionModel.currentIndex().row()
+        if currentIndex != -1:
+            selected = self.searchListModel.item(currentIndex, 0).text()
+            self.favorites.append(selected)
+            self.favorites = list(dict.fromkeys(self.favorites))
+            preferences.setValue('favorites', {
+                'item': self.favorites
+            })
+            self.updateFavoriteList()
+            self.setStatusBarMessage('즐겨찾기에 %s 요리가 추가되었습니다.' % selected)
+
+    def onSearchListViewValueChanged(self):
+        currentIndex = self.searchListSelectionModel.currentIndex().row()
+        if currentIndex != -1:
+            currentFood = self.searchListModel.item(currentIndex, 0).text().replace(' *', '')
+            preferences.setValue(
+                'currentFood', currentFood)
+            self.setFoodInfo(currentFood)
+
+    # Favorites
+    def listAddToFavorites(self):
+        currentIndex = self.recipeListSelectionModel.currentIndex().row()
+        if currentIndex != -1:
+            selected = self.recipeListModel.item(currentIndex, 0).text()
+            self.favorites.append(selected)
+            self.favorites = list(dict.fromkeys(self.favorites))
+            preferences.setValue('favorites', {'item': self.favorites})
+            self.updateFavoriteList()
+            self.setStatusBarMessage('즐겨찾기에 %s 요리가 추가되었습니다.' % selected)
+
+    def onFavoriteListViewValueChanged(self):
+        currentIndex = self.favoriteListSelectionModel.currentIndex().row()
+        if currentIndex != -1:
+            preferences.setValue(
+                'currentFood', self.favoriteListModel.item(currentIndex, 0).text().replace(' *', ''))
+            self.setFoodInfo(self.favoriteListModel.item(currentIndex, 0).text().replace(' *', ''))
+
+    def updateFavoriteList(self):
+        self.favoriteListModel.clear()
+
+        if self.favorites is not None:
+            for item in self.favorites:
+                currentItem = QStandardItem(item)
+                currentItem.setEditable(False)
+                self.favoriteListModel.appendRow(currentItem)
+
+    def onChangeFavoriteOrderUp(self):
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
+        if currentPos > 0:
+            temp = self.favorites[currentPos - 1]
+            self.favorites[currentPos - 1] = self.favorites[currentPos]
+            self.favorites[currentPos] = temp
+            self.updateFavoriteList()
+            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos - 1, 0))
+
+    def onChangeFavoriteOrderDown(self):
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
+
+        if currentPos != -1 and currentPos < (len(self.favorites) - 1):
+            temp = self.favorites[currentPos + 1]
+            self.favorites[currentPos + 1] = self.favorites[currentPos]
+            self.favorites[currentPos] = temp
+            self.updateFavoriteList()
+            self.favoriteListView.setCurrentIndex(self.favoriteListViewModel.index(currentPos + 1, 0))
+
+    def deleteSelectedFavorite(self):
+        currentPos = self.favoriteListSelectionModel.currentIndex().row()
+        if currentPos != -1:
+            currentFood = self.favoriteListModel.item(currentPos, 0).text()
+            self.favorites.pop(currentPos)
+            self.updateFavoriteList()
+            preferences.setValue('favorites', {
+                'item': self.favorites
+            })
+            self.setStatusBarMessage('%s 요리가 즐겨찾기에서 삭제되었습니다.' % currentFood)
+    
+    """ ----------- Events ----------- """
     def closeEvent(self, event):
         if self.ratioDialog:
             self.ratioDialog.close()
@@ -512,6 +578,7 @@ class FullWindow(QMainWindow):
             if event.key() == Qt.Key_Return:
                 self.searchButton.click()
 
+    """ -------- Translations -------- """
     def retranslateUi(self):
         self.setWindowTitle('Spoon %s' % self.version)
 
@@ -554,3 +621,18 @@ class FullWindow(QMainWindow):
             'Spoon', u'\ube44\uc728 \ubc14 On / Off', None))
         self.toolsMenu.setTitle(QCoreApplication.translate(
             'Spoon', u'\ub3c4\uad6c', None))
+
+# Add click event for non-clickable objects
+def click(widget):
+    class Filter(QObject):
+        clicked = Signal()
+
+        def eventFilter(self, obj, event):
+            if obj == widget and event.type() == QEvent.MouseButtonPress:
+                self.clicked.emit()
+                return True
+            return False
+
+    filter = Filter(widget)
+    widget.installEventFilter(filter)
+    return filter.clicked
