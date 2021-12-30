@@ -54,6 +54,7 @@ class DBManager:
             else:
                 return []
 
+    ''' ---------- SELECT ---------- '''
     # Pre-specified categories
     def getCategories(self):
         return RECIPE_MILESTONE
@@ -104,6 +105,29 @@ class DBManager:
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
 
+    def getRelatedRecipe(self, food):
+        sql = 'SELECT NAME\
+               FROM recipe\
+               WHERE NAME = \'' + food + '\''
+        return self.launchQuery(sql)
+    
+    def getRelatedIngredient(self, food):
+        sql = 'SELECT *\
+               FROM ingredient\
+               WHERE NAME = \'' + food + '\''
+        return self.launchQuery(sql)
+
+    def getRank(self, food):
+        sql = 'SELECT RANK\
+               FROM recipe\
+               WHERE NAME = \'' + food + '\''
+        response = self.launchQuery(sql)
+        if len(response) == 0:
+            return -1
+        else:
+            return response[0][0]
+
+    ''' ---------- Search ---------- '''
     def searchByIngredient(self, ingredient):
         sql = 'SELECT NAME, ISEXT\
                FROM recipe\
@@ -134,17 +158,3 @@ class DBManager:
                FROM recipe\
                WHERE %s' % constraiants
         return self.launchQuery(sql)
-
-    def getRelatedRecipe(self, food):
-        sql = 'SELECT NAME\
-               FROM recipe\
-               WHERE NAME = \'' + food + '\''
-        response = self.launchQuery(sql)
-        return response
-
-    def getRelatedIngredient(self, food):
-        sql = 'SELECT *\
-               FROM ingredient\
-               WHERE NAME = \'' + food + '\''
-        response = self.launchQuery(sql)
-        return response

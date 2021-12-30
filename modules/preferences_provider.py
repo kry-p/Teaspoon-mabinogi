@@ -26,7 +26,10 @@ defaultPreferences = {
         'item': []
     },
     'ratioBarLocked': False,
+    'currentTabIndex': 0,
     'currentCategoryIndex': 0,
+    'currentCategoryItemIndex': -1,
+    'currentFavoritesIndex': -1,
     'currentFood': '',
 }
 
