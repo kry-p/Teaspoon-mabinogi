@@ -55,7 +55,7 @@ This application failed to start because no Qt platform plugin could be initiali
   위 조치 후에도 문제가 발생하는 경우 개발자에게 문의해 주세요.
  
 + 설정 백업이나 초기화는 어떻게 하나요?    
-  ```(사용자)/AppData/Local/Yuzu``` 경로에 ```settings.ini``` 파일이 있습니다.  
+  ```(사용자)/AppData/Local/Yuzu/Spoon``` 경로에 ```settings.ini``` 파일이 있습니다.  
   이 파일을 백업하거나 삭제하시면 됩니다.
 
 
@@ -69,7 +69,6 @@ This application failed to start because no Qt platform plugin could be initiali
 
  + 설정 저장 / 불러오기, 초기화 기능 구현
  + 미니 모드 및 모드 전환 기능 구현
- + 레시피 재료 클릭 시 해당 재료의 레시피나 구매처를 
 
 ## 라이선스
 이 애드온 프로그램은 LGPL 라이선스 하에 사용 가능합니다.
