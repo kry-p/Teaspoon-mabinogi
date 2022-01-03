@@ -10,10 +10,7 @@ from PySide6.QtGui import QIcon, QFont
 from PySide6.QtUiTools import QUiLoader
 
 from modules.fullwindow import FullWindow
-from modules.preferences_provider import preferences
-
-
-APP_VERSION = 'v0.2 beta 1'
+from modules.preferences_provider import APP_VERSION, preferences
 
 # from modules import window
 
@@ -43,7 +40,6 @@ APP_VERSION = 'v0.2 beta 1'
 #         self.move(qr.topLeft())
 
 if __name__ == "__main__":
-
     try:
         os.chdir(sys._MEIPASS)
     except:

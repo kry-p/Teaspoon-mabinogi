@@ -5,8 +5,13 @@
 '''
 from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
+# Version
+APP_VERSION = 'v0.2 beta 3'
+BUILD_NUMBER = 9
+
 # Default preferences
 defaultPreferences = {
+    'buildNumber': BUILD_NUMBER,
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
     'ratioDialogOpacity': 70,
@@ -24,6 +29,10 @@ defaultPreferences = {
     },
     'favorites': {
         'item': []
+    },
+    'jumpHistory': {
+        'prev': [],
+        'next': []
     },
     'ratioBarLocked': False,
     'currentTabIndex': 0,
@@ -44,11 +53,23 @@ watcher.addPaths(paths)
 
 # Initialize
 def init():
+    # if preferences based on previous build
+    if not preferences.contains('buildNumber') or int(getPreferences('buildNumber')) < BUILD_NUMBER:
+        resetIncompatibles()
+
     # Return default settings when QSettings doesn't have specific props
     for key, value in defaultPreferences.items():
         if not preferences.contains(key):
             preferences.setValue(key, value)
 
+# Reset incompatible preferences
+def resetIncompatibles():
+    reset = ['buildNumber', 'jumpHistory']
+
+    for key in reset:
+        preferences.setValue(key, defaultPreferences[key])
+        print(defaultPreferences[key])
+    
 # Read from QSettings
 def getPreferences(name):
     pref = preferences.value(name)

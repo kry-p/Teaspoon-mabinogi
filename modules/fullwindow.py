@@ -49,6 +49,9 @@ class FullWindow(QMainWindow):
         self.createInfoBox()  # Information box
         self.createLeftToolBox()  # Left toolbox
 
+        # history
+        self.prev = list()
+
         # Misc. buttons
         self.ratioBarButton = QPushButton(self.mainWidget)
         self.ratioBarButton.setGeometry(QRect(9, 280, 201, 31))
@@ -330,6 +333,7 @@ class FullWindow(QMainWindow):
     # When stuff item selected
     def onRecipeItemClicked(self, pos):
         text = self.stuffNames[pos].text().replace(' *', '')
+        temp = getPreferences('currentFood')
         relatedIngredient = db.getRelatedIngredient(text)
         
         if len(relatedIngredient) == 0:
@@ -344,8 +348,8 @@ class FullWindow(QMainWindow):
                 res = self.jumpToCurrentFood(relatedRecipe)
 
                 if res == 0:
-                    self.setStatusBarMessage('%s의 레시피를 표시합니다.' % relatedRecipe)
-
+                    self.prev.append(temp)
+                    self.setStatusBarMessage('%s의 레시피를 표시합니다. 돌아가기 : Backspace' % relatedRecipe)
                 # self.setFoodInfo(relatedRecipe)
                 # rank = db.getRank(relatedRecipe)
 
@@ -524,7 +528,8 @@ class FullWindow(QMainWindow):
             currentFood = self.recipeListModel.item(currentIndex, 0).text().replace(' *', '')
             preferences.setValue('currentFood', currentFood)
             preferences.setValue('currentCategoryItemIndex', currentIndex)
-            self.setFoodInfo(currentFood.replace(' *', ''))\
+            self.setFoodInfo(currentFood.replace(' *', ''))
+            self.prev = list()
 
     # Search
     def searchAddToFavorites(self):
@@ -546,6 +551,7 @@ class FullWindow(QMainWindow):
             preferences.setValue(
                 'currentFood', currentFood)
             self.setFoodInfo(currentFood)
+            self.prev = list()
 
     # Favorites
     def listAddToFavorites(self):
@@ -566,6 +572,7 @@ class FullWindow(QMainWindow):
                 'currentFood', self.favoriteListModel.item(currentIndex, 0).text().replace(' *', ''))
             self.setFoodInfo(self.favoriteListModel.item(currentIndex, 0).text().replace(' *', ''))    
             preferences.setValue('currentFavoritesIndex', currentIndex)
+            self.prev = list()
 
     def updateFavoriteList(self):
         self.favoriteListModel.clear()
@@ -608,6 +615,7 @@ class FullWindow(QMainWindow):
             })
             preferences.setValue('currentFavoritesIndex', -1)
             self.setStatusBarMessage('%s 요리가 즐겨찾기에서 삭제되었습니다.' % currentFood)
+            self.prev = list()
     
     """ ----------- Events ----------- """
     def closeEvent(self, event):
@@ -618,6 +626,13 @@ class FullWindow(QMainWindow):
     
     def keyPressEvent(self, event):
         # If return button pressed
+        if self.selectorWidget.currentIndex() == 0:
+            if event.key() == Qt.Key_Backspace:
+                print(self.prev)
+                if len(self.prev) > 0:
+                    prev = self.prev.pop()
+                    self.setFoodInfo(prev)
+                    self.setStatusBarMessage('이전 레시피 %s입니다. 돌아가기 : Backspace' % prev)
         if self.selectorWidget.currentIndex() == 1:
             if event.key() == Qt.Key_Return:
                 self.searchButton.click()
