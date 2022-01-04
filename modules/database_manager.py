@@ -17,7 +17,7 @@ RECIPE_MILESTONE = {
                      '5', '6', '7', '8',
                      '9', 'A', 'B', 'C',
                      'D', 'E', 'F', 'P'],
-    'categoryColumns': ['STR', 'INT', 'DEX', 'WIL', 'LUC',
+    'effectColumns': ['STR', 'INT', 'DEX', 'WIL', 'LUC',
                         'HP', 'MP', 'SP',
                         'MINDAM', 'MAXDAM',
                         'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX'],
@@ -26,7 +26,7 @@ RECIPE_MILESTONE = {
                 '바날렌', '배리', '메이드', '교역', '렘 / 람', '마차']
 }
 RECIPE_MILESTONE['categoryName'].reverse()
-RECIPE_MILESTONE['categoryColumns'].reverse()
+RECIPE_MILESTONE['effectColumns'].reverse()
 RECIPE_MILESTONE['categoryCode'].reverse()
 
 # Wrapper class
@@ -142,17 +142,13 @@ class DBManager:
                WHERE NAME LIKE \'%' + name + '%\''
         return self.launchQuery(sql)
     
-    def searchByEffect(self, selected):
-        # OR operation
+    def searchByEffect(self, query):
         constraiants = ''
-        for i in range(len(selected)):
-            if selected[i]:
-                if constraiants == '':
-                    constraiants += "%s NOT NULL " % RECIPE_MILESTONE['categoryColumns'][15 - i]
-                elif i == (len(selected) - 1):
-                    constraiants += 'OR %s NOT NULL' % RECIPE_MILESTONE['categoryColumns'][15 - i]
-                else:
-                    constraiants += 'OR %s NOT NULL ' % RECIPE_MILESTONE['categoryColumns'][15 - i]
+        for i in range(len(query)):
+            if i % 2 == 1:
+                constraiants += " %s " % query[i]
+            else:
+                constraiants += "%s NOT NULL" % query[i]
 
         sql = 'SELECT NAME, ISEXT\
                FROM recipe\

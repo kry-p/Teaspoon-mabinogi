@@ -6,9 +6,9 @@
 
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt, QObject, Signal, QEvent)
-from PySide6.QtGui import (QAction, QKeySequence, QShortcut, QStandardItem, QStandardItemModel)
+from PySide6.QtGui import (QAction, QStandardItem, QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
-                               QListView, QMainWindow, QMenu, QMenuBar, QMessageBox,
+                               QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
                                QTabWidget, QWidget, QStatusBar)
 
@@ -397,26 +397,35 @@ class FullWindow(QMainWindow):
                 except:
                     result = None
             if currentEnabled == 1:
+                query = list()
                 categories = ["체력", "지력", "솜씨", "의지", "행운",
                               "HP", "MP", "SP",
                               "민댐", "맥댐", "마공",
                               "방어", "보호", "마방", "마보", "효과"]
-                query = list()
-                for idx in range(len(categories)):
-                    if categories[idx] in currentText:
-                        query.append(True)
-                    else:
-                        query.append(False)
+                
+                text = [item for item in currentText.split(' ') if item != '']
+
                 try:
+                    for i in range(len(text)):
+                        if i % 2 == 1:
+                            oper = text[i]
+                            if oper.lower() == 'and' or oper.lower() == 'or':
+                                query.append(oper.upper())
+                            else:
+                                raise Exception
+                        else:
+                            query.append(CATEGORIES['effectColumns'][15 - categories.index(text[i])])
+                    if len(query) % 2 == 0:
+                        raise Exception
                     result = db.searchByEffect(query)
+                    self.setStatusBarMessage('')
                 except:
-                    result = None
+                    self.setStatusBarMessage('검색어를 잘못 입력했습니다. 정확하게 입력했는지 확인해 주세요.')
             if currentEnabled == 2:
                 try:
                     result = db.searchByIngredient(currentText)
                 except:
                     result = None
-                
             if result is not None:
                 for item in result:
                     currentItem = QStandardItem(item[0] + (' *' if item[1] == 1 else ''))
@@ -450,17 +459,6 @@ class FullWindow(QMainWindow):
             return -1
 
     """ ----------- Actions ----------- """
-    # def toggleRatioDialog(self):
-    #     data = list(map(lambda value: 0 if value.text() ==
-    #                     '' else int(value.text()), self.stuffRatioInputs))
-    #     test = sum(data)
-    #     if self.ratioDialog is None and test != 0:
-    #         self.ratioDialog = RatioDialog(data)
-    #     else:
-    #         if self.ratioDialog is not None:
-    #             self.ratioDialog.close()
-    #         self.ratioDialog = None
-
     def getCurrentCategoryList(self):
         self.recipeListModel.clear()
         currentCategoryItems = db.getFoods(
@@ -624,7 +622,6 @@ class FullWindow(QMainWindow):
 
     def keyPressEvent(self, event):
         # If return button pressed
-        # if self.selectorWidget.currentIndex() == 0:
         if event.key() == Qt.Key_Backspace:
             if len(self.prev) > 0:
                 prev = self.prev.pop()
