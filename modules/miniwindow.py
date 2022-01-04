@@ -10,6 +10,8 @@ from PySide6.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu,
                                QMenuBar, QPushButton, QWidget)
 
 from modules.elements import Widget
+from .preferences_provider import watcher, preferences, getPreferences
+from .common import common
 
 PERCENT_COLOR = '#AAAAAA'
 NAME_LABEL_STYLESHEET = 'font-weight: 600;'
@@ -36,27 +38,30 @@ class MiniWindow(QMainWindow):
         self.setMenuBar(self.menuBar)
         self.menuBar.addAction(self.toolsMenu.menuAction())
         self.actions = {
-            'lockRatioBar': Widget(widget = QAction(self),
+            'lockRatio': Widget(widget = QAction(self),
                                    text = "비율 바 잠금"),
             'changeMode': Widget(widget = QAction(self),
                                  text = "모드 변경"),
             'settings': Widget(widget = QAction(self),
                                text = "설정"),
             'help': Widget(widget = QAction(self),
-                           text = "도움말"),
+                           text = "도움말 (공사 중)"),
         }
-        self.actions['lockRatioBar'].getWidget().setCheckable(True)
+        self.actions['lockRatio'].getWidget().setCheckable(True)
+        self.actions['lockRatio'].getWidget().setChecked(
+            True if getPreferences('ratioBarLocked') == 'true' else False)
+        self.actions['help'].getWidget().setEnabled(False)
 
-        self.toolsMenu.addAction(self.actions['lockRatioBar'].getWidget())
+        self.toolsMenu.addAction(self.actions['lockRatio'].getWidget())
         self.toolsMenu.addAction(self.actions['changeMode'].getWidget())
         self.toolsMenu.addSeparator()
         self.toolsMenu.addAction(self.actions['settings'].getWidget())
         self.toolsMenu.addAction(self.actions['help'].getWidget())
 
         # Ratio box
-        self.ratioBox = Widget(widget = QGroupBox(self.centralWidget),
-                               title = '비율',
-                               geometry = QRect(10, 10, 171, 111))
+        self.ratioBox = QGroupBox(self.centralWidget)
+        self.ratioBox.setTitle('비율')
+        self.ratioBox.setGeometry(QRect(10, 10, 171, 111))
     
         # Stuff labels
         self.stuffLabels = [
@@ -75,12 +80,9 @@ class MiniWindow(QMainWindow):
             self.stuffLabels[i].setStyleSheet('color: %s;' % PERCENT_COLOR)
 
         # Stuff inputs
-        self.stuffInput0 = QLineEdit(self.ratioBox)
-        self.stuffInput0.setGeometry(QRect(95, 20, 41, 20))
-        self.stuffInput1 = QLineEdit(self.ratioBox)
-        self.stuffInput1.setGeometry(QRect(95, 50, 41, 20))
-        self.stuffInput2 = QLineEdit(self.ratioBox)
-        self.stuffInput2.setGeometry(QRect(95, 80, 41, 20))
+        self.stuffRatioInputs = [QLineEdit(self.ratioBox), QLineEdit(self.ratioBox), QLineEdit(self.ratioBox)]
+        for i in range(len(self.stuffRatioInputs)):
+            self.stuffRatioInputs[i].setGeometry(QRect(95, (20 + 30 * i), 41, 20))
         
         self.ratioBarButton = Widget(widget = QPushButton(self.centralWidget),
                                      geometry = QRect(10, 130, 171, 31),
@@ -88,4 +90,28 @@ class MiniWindow(QMainWindow):
         
         QMetaObject.connectSlotsByName(self)
 
+        # Actions
+        self.actions['changeMode'].getWidget().triggered.connect(self.changeMainDialog)
+        self.actions['lockRatio'].getWidget().triggered.connect(self.toggleRatioBarLocked)
+        self.ratioBarButton.getWidget().clicked.connect(lambda : common.toggleRatioDialog(self.stuffRatioInputs))
+
+    # Set full ver.
+    def setFullWindow(self, window):
+        self.full = window
+
+    # Change window
+    def changeMainDialog(self):
+        self.full.show()
+        self.close()
+
+    # UI elements
+    def toggleRatioBarLocked(self):
+        preferences.setValue('ratioBarLocked',
+                            self.actions['lockRatio'].getWidget().isChecked())
   
+    """ ----------- Events ----------- """
+    def closeEvent(self, event):
+        if common.ratioDialog:
+            common.ratioDialog.close()
+        if common.settingsDialog:
+            common.settingsDialog.close()

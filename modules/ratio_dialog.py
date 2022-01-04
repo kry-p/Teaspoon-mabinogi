@@ -60,6 +60,10 @@ class RatioDialog(QMainWindow):
                 'background-color: ' + color[i % 2] + ';')
 
             temp += list[i]
+        
+        for i in range(len(list), 3):
+            self.labels[i].setStyleSheet(
+                'background-color: rgba(255, 255, 255, 0);')
 
     # Set new ratio value
     def update(self, newValue):

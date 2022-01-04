@@ -32,5 +32,8 @@ class Widget():
     def setStyleSheet(self, style):
         self.widget.setStyleSheet(style)
 
+    def setAlignment(self, align):
+        self.widget.setAlignment(align)
+
     def getWidget(self):
         return self.widget

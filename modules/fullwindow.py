@@ -6,7 +6,7 @@
 
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt, QObject, Signal, QEvent)
-from PySide6.QtGui import (QAction, QStandardItem, QStandardItemModel)
+from PySide6.QtGui import (QAction, QKeySequence, QShortcut, QStandardItem, QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
                                QListView, QMainWindow, QMenu, QMenuBar, QMessageBox,
                                QPushButton, QRadioButton, QSizePolicy,
@@ -17,9 +17,8 @@ from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
 
 from modules.elements import Widget
 from . import database_manager
-from .settings_dialog import SettingsDialog
-from .ratio_dialog import RatioDialog
 from .preferences_provider import (preferences, watcher, init, getPreferences)
+from .common import common
 
 db = database_manager.DBManager()
 CATEGORIES = db.getCategories()
@@ -34,9 +33,6 @@ class FullWindow(QMainWindow):
         init()
 
         self.version = version
-        self.ratioDialog = None
-        self.settingsDialog = None
-        self.expanded = getPreferences('initialWindowExpanded')
         self.currentFood = getPreferences('currentFood')
         self.favorites = [] if getPreferences('favorites')['item'] is None else getPreferences('favorites')['item']
 
@@ -60,10 +56,10 @@ class FullWindow(QMainWindow):
         self.selectorWidget.setCurrentIndex(0)
 
         # Actions
-        self.ratioBarButton.clicked.connect(self.toggleRatioDialog)
+        self.ratioBarButton.clicked.connect(lambda : common.toggleRatioDialog(self.stuffRatioInputs))
         self.recipeListView.doubleClicked.connect(self.listAddToFavorites)
         self.searchListView.doubleClicked.connect(self.searchAddToFavorites)
-        self.actions['settings'].triggered.connect(self.openSettingsDialog)
+        self.actions['settings'].triggered.connect(common.openSettingsDialog)
         self.actions['lockRatio'].triggered.connect(self.toggleRatioBarLocked)
         self.rankComboBox.currentIndexChanged.connect(self.onChangeCategory)
         self.recipeListSelectionModel.currentChanged.connect(
@@ -78,7 +74,7 @@ class FullWindow(QMainWindow):
         self.searchButton.clicked.connect(self.search)
         self.selectorWidget.currentChanged.connect(self.onTabIndexChanged)
 
-        
+        self.actions['changeMode'].triggered.connect(self.changeMainDialog)
 
         # Misc. operations
         self.selectorWidget.setCurrentIndex(int(getPreferences('currentTabIndex')))
@@ -98,10 +94,11 @@ class FullWindow(QMainWindow):
             if len(favorites) == 0:
                 self.favorites = []
                 self.updateFavoriteList()
-        if self.ratioDialog is not None:
-            data = list(map(lambda value: 0 if value.text() ==
+        if common.ratioDialog is not None:
+            if getPreferences('initialWindowExpanded') == 'true':
+                data = list(map(lambda value: 0 if value.text() ==
                         '' else int(value.text()), self.stuffRatioInputs))
-            self.ratioDialog.update(data)
+                common.ratioDialog.update(data)
 
     """ ********** UI ********** """
     def setWindow(self):
@@ -129,7 +126,7 @@ class FullWindow(QMainWindow):
         self.actions['lockRatio'].setCheckable(True)
         self.actions['lockRatio'].setChecked(
             True if getPreferences('ratioBarLocked') == 'true' else False)
-        self.actions['changeMode'].setEnabled(False)
+        # self.actions['changeMode'].setEnabled(False)
         self.actions['help'].setEnabled(False)
 
         self.menuBar.addAction(self.toolsMenu.menuAction())
@@ -453,21 +450,16 @@ class FullWindow(QMainWindow):
             return -1
 
     """ ----------- Actions ----------- """
-    # UI elements
-    def toggleRatioBarLocked(self):
-        preferences.setValue('ratioBarLocked',
-                            self.actions['lockRatio'].isChecked())
-
-    def toggleRatioDialog(self):
-        data = list(map(lambda value: 0 if value.text() ==
-                        '' else int(value.text()), self.stuffRatioInputs))
-        test = sum(data)
-        if self.ratioDialog is None and test != 0:
-            self.ratioDialog = RatioDialog(data)
-        else:
-            if self.ratioDialog is not None:
-                self.ratioDialog.close()
-            self.ratioDialog = None
+    # def toggleRatioDialog(self):
+    #     data = list(map(lambda value: 0 if value.text() ==
+    #                     '' else int(value.text()), self.stuffRatioInputs))
+    #     test = sum(data)
+    #     if self.ratioDialog is None and test != 0:
+    #         self.ratioDialog = RatioDialog(data)
+    #     else:
+    #         if self.ratioDialog is not None:
+    #             self.ratioDialog.close()
+    #         self.ratioDialog = None
 
     def getCurrentCategoryList(self):
         self.recipeListModel.clear()
@@ -508,11 +500,17 @@ class FullWindow(QMainWindow):
             else:
                 statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
 
-    def openSettingsDialog(self, food):
-        if self.settingsDialog is None:
-            self.settingsDialog = SettingsDialog()
-        self.settingsDialog.show()
+    def changeMainDialog(self):
+        self.mini.show()
+        self.close()
 
+    def setMiniWindow(self, window):
+        self.mini = window
+
+    # UI elements
+    def toggleRatioBarLocked(self):
+        preferences.setValue('ratioBarLocked',
+                            self.actions['lockRatio'].isChecked())
 
     # Categories
     def onChangeCategory(self):
@@ -619,20 +617,19 @@ class FullWindow(QMainWindow):
     
     """ ----------- Events ----------- """
     def closeEvent(self, event):
-        if self.ratioDialog:
-            self.ratioDialog.close()
-        if self.settingsDialog:
-            self.settingsDialog.close()
-    
+        if common.ratioDialog:
+            common.ratioDialog.close()
+        if common.settingsDialog:
+            common.settingsDialog.close()
+
     def keyPressEvent(self, event):
         # If return button pressed
-        if self.selectorWidget.currentIndex() == 0:
-            if event.key() == Qt.Key_Backspace:
-                print(self.prev)
-                if len(self.prev) > 0:
-                    prev = self.prev.pop()
-                    self.setFoodInfo(prev)
-                    self.setStatusBarMessage('이전 레시피 %s입니다. 돌아가기 : Backspace' % prev)
+        # if self.selectorWidget.currentIndex() == 0:
+        if event.key() == Qt.Key_Backspace:
+            if len(self.prev) > 0:
+                prev = self.prev.pop()
+                self.setFoodInfo(prev)
+                self.setStatusBarMessage('이전 레시피 %s입니다. 돌아가기 : Backspace' % prev)
         if self.selectorWidget.currentIndex() == 1:
             if event.key() == Qt.Key_Return:
                 self.searchButton.click()
@@ -642,7 +639,7 @@ class FullWindow(QMainWindow):
         self.setWindowTitle('Spoon %s' % self.version)
 
         self.actions['lockRatio'].setText('비율 바 잠금')
-        self.actions['changeMode'].setText('모드 변경 (공사 중)')
+        self.actions['changeMode'].setText('모드 변경')
         self.actions['settings'].setText('설정')
         self.actions['help'].setText('도움말 (공사 중)')
 

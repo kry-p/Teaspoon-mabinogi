@@ -68,7 +68,6 @@ def resetIncompatibles():
 
     for key in reset:
         preferences.setValue(key, defaultPreferences[key])
-        print(defaultPreferences[key])
     
 # Read from QSettings
 def getPreferences(name):
