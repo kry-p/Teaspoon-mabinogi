@@ -15,7 +15,7 @@ defaultPreferences = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
     'ratioDialogOpacity': 70,
-    'ratioDialogDefaultPosition': {
+    'ratioDialogPosition': {
         'x': 356,
         'y': 690
     },

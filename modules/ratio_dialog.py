@@ -6,7 +6,7 @@
 from PyQt5.QtCore import (QRect, Qt)
 from PyQt5.QtGui import (QCursor, QFont)
 from PyQt5.QtWidgets import (QLabel, QMainWindow)
-from .preferences_provider import getPreferences, watcher
+from .preferences_provider import getPreferences, watcher, preferences
 
 rangeFont = QFont('Arial', 1)
 
@@ -35,8 +35,8 @@ class RatioDialog(QMainWindow):
             'width': getPreferences('ratioDialogSize')['width'],
             'height': getPreferences('ratioDialogSize')['height']
         }
-        self.move(getPreferences('ratioDialogDefaultPosition')['x'],
-                  getPreferences('ratioDialogDefaultPosition')['y'])
+        self.move(getPreferences('ratioDialogPosition')['x'],
+                  getPreferences('ratioDialogPosition')['y'])
         self.setWindowOpacity(
             float(int(getPreferences('ratioDialogOpacity')) - 1) * 0.01)
         self.resize(self.currentWindowSize['width'],
@@ -94,6 +94,13 @@ class RatioDialog(QMainWindow):
     def mouseMoveEvent(self, event):
         if Qt.LeftButton and self.m_flag:
             self.move(event.globalPos() - self.m_Position)
+            
+            geometry = self.geometry()
+            val = {
+                'x': geometry.x(),
+                'y': geometry.y()
+            }
+            preferences.setValue('ratioDialogPosition', val)
             event.accept()
 
     def mouseReleaseEvent(self, event):

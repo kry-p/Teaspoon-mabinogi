@@ -9,7 +9,7 @@ from PyQt5.QtGui import (QIntValidator)
 from PyQt5.QtWidgets import (QLabel, QLineEdit, QMainWindow, QPushButton,
                                QRadioButton, QSizePolicy, QTabWidget, QWidget,
                                QMessageBox, QSlider, QColorDialog)
-from .preferences_provider import preferences, getPreferences
+from .preferences_provider import preferences, watcher, getPreferences
 from .elements import Widget
 
 STYLE_BOLD = 'font-weight: 600;'
@@ -20,6 +20,9 @@ class SettingsDialog(QMainWindow):
         super().__init__()
         self.resize(320, 250)
         self.setFixedSize(QSize(320, 250))
+        
+        # Settings watcher
+        watcher.fileChanged.connect(self.onFileChanged)
 
         # Settings for window
         self.setWindowTitle('설정')
@@ -83,12 +86,12 @@ class SettingsDialog(QMainWindow):
             # position
             'ratioBarXPos': Widget(widget = QLineEdit(self.barOption),
                                    geometry = QRect(100, 50, 41, 20), 
-                                   text = str(getPreferences('ratioDialogDefaultPosition')['x']),
+                                   text = str(getPreferences('ratioDialogPosition')['x']),
                                    onTextChanged = self.onRatioBarPositionChanged,
                                    validator = QIntValidator(1, 3840)),
             'ratioBarYPos': Widget(widget = QLineEdit(self.barOption),
                                    geometry = QRect(170, 50, 41, 20), 
-                                   text = str(getPreferences('ratioDialogDefaultPosition')['y']),
+                                   text = str(getPreferences('ratioDialogPosition')['y']),
                                    onTextChanged = self.onRatioBarPositionChanged,
                                    validator = QIntValidator(1, 2160)),
             # color
@@ -197,7 +200,7 @@ class SettingsDialog(QMainWindow):
         preferences.setValue('ratioDialogSize', val)
 
     def onRatioBarPositionChanged(self):
-        val = getPreferences('ratioDialogDefaultPosition')
+        val = getPreferences('ratioDialogPosition')
         widget = [self.input['ratioBarXPos'].getWidget(), 
                   self.input['ratioBarYPos'].getWidget()]
         
@@ -209,7 +212,7 @@ class SettingsDialog(QMainWindow):
         val['x'] = int(widget[0].text())
         val['y'] = int(widget[1].text())
     
-        preferences.setValue('ratioDialogDefaultPosition', val)
+        preferences.setValue('ratioDialogPosition', val)
 
     def onColorChanged(self):
         val = getPreferences('ratioBarColor')
@@ -227,3 +230,10 @@ class SettingsDialog(QMainWindow):
 
     def onResetFavorites(self):
         preferences.setValue('favorites', [])
+
+    # If QSettings file has changed
+    def onFileChanged(self):
+        # Detects 
+        pref = getPreferences('ratioDialogPosition')
+        self.input['ratioBarXPos'].getWidget().setText(str(pref['x']))
+        self.input['ratioBarYPos'].getWidget().setText(str(pref['y']))
