@@ -3,10 +3,10 @@
 # Settings window for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
+from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt)
-from PySide6.QtGui import (QIntValidator)
-from PySide6.QtWidgets import (QLabel, QLineEdit, QMainWindow, QPushButton,
+from PyQt5.QtGui import (QIntValidator)
+from PyQt5.QtWidgets import (QLabel, QLineEdit, QMainWindow, QPushButton,
                                QRadioButton, QSizePolicy, QTabWidget, QWidget,
                                QMessageBox, QSlider, QColorDialog)
 from .preferences_provider import preferences, getPreferences
@@ -143,11 +143,12 @@ class SettingsDialog(QMainWindow):
         # Opacity for ratio bar
         self.opacitySlider = QSlider(self.barOption)
         self.opacitySlider.setGeometry(QRect(100, 140, 131, 22))
-        self.opacitySlider.setMaximum(100)
+        self.opacitySlider.setMaximum(101)
+        self.opacitySlider.setMinimum(1)
         self.opacitySlider.setOrientation(Qt.Horizontal)
 
-        self.opacitySlider.setSliderPosition(float(
-            getPreferences('ratioDialogOpacity')))
+        self.opacitySlider.setSliderPosition(
+            int(getPreferences('ratioDialogOpacity')))
 
         # Dialog button
         self.acceptButton = QPushButton(self.centralwidget)
@@ -174,7 +175,7 @@ class SettingsDialog(QMainWindow):
 
     def onOpacityChanged(self):
         preferences.setValue('ratioDialogOpacity', self.opacitySlider.value())
-
+    
     def onRatioBarSizeChanged(self):
         val = getPreferences('ratioDialogSize')
         next = [
@@ -185,7 +186,7 @@ class SettingsDialog(QMainWindow):
         for idx in range(len(next)):
             if next[idx].text() == '0' or next[idx].text() == '':
                 reply = QMessageBox.critical(
-                    self, '오류', '너비는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
+                    self, '오류', '크기는 0일 수 없습니다.', QMessageBox.Ok, QMessageBox.Ok)
                 if reply == QMessageBox.Ok:
                     next[idx].setText(str(val['width'])) if idx == 0 else next[idx].setText(str(val['height']))
             else:
@@ -199,12 +200,15 @@ class SettingsDialog(QMainWindow):
         val = getPreferences('ratioDialogDefaultPosition')
         widget = [self.input['ratioBarXPos'].getWidget(), 
                   self.input['ratioBarYPos'].getWidget()]
-        for value in widget:
-            temp = value.text()
+        
+        for i in range(len(widget)):
+            temp = widget[i].text()
             if temp == '':
-                value.setText('0')
-            val['x'] = int(widget[0].text())
-            val['y'] = int(widget[1].text())
+                widget[i].setText('0')
+
+        val['x'] = int(widget[0].text())
+        val['y'] = int(widget[1].text())
+    
         preferences.setValue('ratioDialogDefaultPosition', val)
 
     def onColorChanged(self):

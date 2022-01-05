@@ -4,13 +4,14 @@
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
-                            Qt, QObject, Signal, QEvent)
-from PySide6.QtGui import (QAction, QStandardItem, QStandardItemModel)
-from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
+from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
+                            Qt, QObject, QEvent, pyqtSignal)
+from PyQt5.QtGui import (QStandardItem, QStandardItemModel)
+from PyQt5.QtWidgets import (QComboBox, QGroupBox, QLabel,
                                QListView, QMainWindow, QMenu, QMenuBar,
                                QPushButton, QRadioButton, QSizePolicy,
-                               QTabWidget, QWidget, QStatusBar)
+                               QAction, QTabWidget, QWidget, QStatusBar)
+from PyQt5.QtWidgets import QLineEdit
 
 # import time
 # import threading
@@ -95,10 +96,9 @@ class FullWindow(QMainWindow):
                 self.favorites = []
                 self.updateFavoriteList()
         if common.ratioDialog is not None:
-            if getPreferences('initialWindowExpanded') == 'true':
-                data = list(map(lambda value: 0 if value.text() ==
-                        '' else int(value.text()), self.stuffRatioInputs))
-                common.ratioDialog.update(data)
+            data = list(map(lambda value: 0 if value.text() ==
+                '' else int(value.text()), self.stuffRatioInputs))
+            common.ratioDialog.update(data)
 
     """ ********** UI ********** """
     def setWindow(self):
@@ -434,16 +434,9 @@ class FullWindow(QMainWindow):
     
     # Set status bar message
     def setStatusBarMessage(self, message):
-        self.statusBar.showMessage(message)
-        # # Display message for 15 sec.
-        # def work(message):
-        #     self.statusBar.showMessage(message)
-        #     time.sleep(15)
-        #     self.statusBar.showMessage('')
-
-        # thread = threading.Thread(target = work, args = (message, ))
-        # thread.start()
-
+        # Display message for 10 sec.
+        self.statusBar.showMessage(message, 10000)
+        
     def jumpToCurrentFood(self, food):
         self.setFoodInfo(food)
         rank = db.getRank(food)
@@ -679,7 +672,7 @@ class FullWindow(QMainWindow):
 # Add click event for non-clickable objects
 def click(widget):
     class Filter(QObject):
-        clicked = Signal()
+        clicked = pyqtSignal()
 
         def eventFilter(self, obj, event):
             if obj == widget and event.type() == QEvent.MouseButtonPress:

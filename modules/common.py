@@ -3,14 +3,6 @@
 # Main window for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
-                            Qt, QObject, Signal, QEvent)
-from PySide6.QtGui import (QAction, QKeySequence, QShortcut, QStandardItem, QStandardItemModel)
-from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
-                               QListView, QMainWindow, QMenu, QMenuBar, QMessageBox,
-                               QPushButton, QRadioButton, QSizePolicy,
-                               QTabWidget, QWidget, QStatusBar)
-
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 

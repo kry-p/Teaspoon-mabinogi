@@ -3,7 +3,7 @@
 # Preferences provider for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
+from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
 # Version
 APP_VERSION = 'v0.2 beta 3'

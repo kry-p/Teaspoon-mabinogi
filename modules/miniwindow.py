@@ -4,10 +4,9 @@
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 
-from PySide6.QtCore import (QMetaObject, QRect, QSize, Qt)
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu, 
-                               QMenuBar, QPushButton, QWidget)
+from PyQt5.QtCore import (QMetaObject, QRect, QSize, Qt)
+from PyQt5.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu, 
+                               QMenuBar, QPushButton, QWidget, QAction)
 
 from modules.elements import Widget
 from .preferences_provider import watcher, preferences, getPreferences
@@ -93,6 +92,7 @@ class MiniWindow(QMainWindow):
         # Actions
         self.actions['changeMode'].getWidget().triggered.connect(self.changeMainDialog)
         self.actions['lockRatio'].getWidget().triggered.connect(self.toggleRatioBarLocked)
+        self.actions['settings'].getWidget().triggered.connect(common.openSettingsDialog)
         self.ratioBarButton.getWidget().clicked.connect(lambda : common.toggleRatioDialog(self.stuffRatioInputs))
 
     # Set full ver.
