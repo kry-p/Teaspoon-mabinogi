@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu,
 
 from modules.elements import Widget
 from .preferences_provider import watcher, preferences, getPreferences
-from .common import common
+from .common import Common
 
 PERCENT_COLOR = '#AAAAAA'
 NAME_LABEL_STYLESHEET = 'font-weight: 600;'
@@ -22,6 +22,7 @@ class MiniWindow(QMainWindow):
 
         # Settings for window
         self.APP_VERSION = APP_VERSION
+        self.common = Common()
         self.setWindowTitle('Spoon %s' % self.APP_VERSION)
         self.resize(190, 190)
         self.setFixedSize(QSize(190, 190))
@@ -92,8 +93,8 @@ class MiniWindow(QMainWindow):
         # Actions
         self.actions['changeMode'].getWidget().triggered.connect(self.changeMainDialog)
         self.actions['lockRatio'].getWidget().triggered.connect(self.toggleRatioBarLocked)
-        self.actions['settings'].getWidget().triggered.connect(common.openSettingsDialog)
-        self.ratioBarButton.getWidget().clicked.connect(lambda : common.toggleRatioDialog(self.stuffRatioInputs))
+        self.actions['settings'].getWidget().triggered.connect(self.common.openSettingsDialog)
+        self.ratioBarButton.getWidget().clicked.connect(lambda : self.common.toggleRatioDialog(self.stuffRatioInputs))
 
     # Set full ver.
     def setFullWindow(self, window):
@@ -111,7 +112,7 @@ class MiniWindow(QMainWindow):
   
     """ ----------- Events ----------- """
     def closeEvent(self, event):
-        if common.ratioDialog:
-            common.ratioDialog.close()
-        if common.settingsDialog:
-            common.settingsDialog.close()
+        if self.common.ratioDialog:
+            self.common.ratioDialog.close()
+        if self.common.settingsDialog:
+            self.common.settingsDialog.close()

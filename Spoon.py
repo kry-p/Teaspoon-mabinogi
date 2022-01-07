@@ -18,25 +18,16 @@ if __name__ == "__main__":
         os.chdir(sys._MEIPASS)
     except:
         os.chdir(os.getcwd())
-    # os.environ["QT_SCALE_FACTOR_ROUNDING_POLICY"] = "1"
-    
-    # QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    # QCoreApplication.setAttribute(Qt.AA_Use96Dpi, True)
-    
-    # QCoreApplication.setAttribute(Qt.AA_DisableHighDpiScaling)
-    
-    # os.environ["QT_FONT_DPI"] = "96"
-    
-
     app = QApplication([])
-    
     font = QFont('NanumGothic')
     font.setPointSize(9)
+
     if random.randrange(1, 31) == 7:
         app.setWindowIcon(QIcon(res.icon_alt))
     else:
         app.setWindowIcon(QIcon(res.icon))
+    
     app.setFont(QFont(font))
 
     global mini

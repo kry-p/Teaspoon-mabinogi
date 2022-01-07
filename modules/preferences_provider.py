@@ -6,8 +6,8 @@
 from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
 # Version
-APP_VERSION = 'v0.2 beta 3'
-BUILD_NUMBER = 9
+APP_VERSION = 'v0.2 beta 4'
+BUILD_NUMBER = 10
 
 # Default preferences
 defaultPreferences = {
@@ -29,10 +29,6 @@ defaultPreferences = {
     },
     'favorites': {
         'item': []
-    },
-    'jumpHistory': {
-        'prev': [],
-        'next': []
     },
     'ratioBarLocked': False,
     'currentTabIndex': 0,
@@ -64,7 +60,7 @@ def init():
 
 # Reset incompatible preferences
 def resetIncompatibles():
-    reset = ['buildNumber', 'jumpHistory']
+    reset = ['buildNumber']
 
     for key in reset:
         preferences.setValue(key, defaultPreferences[key])
