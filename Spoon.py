@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon, QFont, QScreen
 
 from modules.fullwindow import FullWindow
 from modules.miniwindow import MiniWindow
-from modules.preferences_provider import APP_VERSION, getPreferences, preferences
+from modules.preferences_provider import APP_VERSION, getPreferences, init
 
 
 if __name__ == "__main__":
@@ -18,6 +18,7 @@ if __name__ == "__main__":
         os.chdir(sys._MEIPASS)
     except:
         os.chdir(os.getcwd())
+    init()
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     app = QApplication([])
     font = QFont('NanumGothic')

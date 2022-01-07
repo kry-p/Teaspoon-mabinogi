@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QLineEdit
 
 from modules.elements import Widget
 from . import database_manager
-from .preferences_provider import (preferences, watcher, init, getPreferences)
+from .preferences_provider import (preferences, watcher, getPreferences)
 from .common import Common, customEvent
 
 
@@ -32,7 +32,6 @@ STYLE_BOLD = 'font-weight: 600;'
 class FullWindow(QMainWindow):
     def __init__(self, version):
         super().__init__()
-        init()
 
         self.version = version
         self.common = Common()
@@ -140,9 +139,8 @@ class FullWindow(QMainWindow):
         self.historyMenu = QMenu(self.menuBar)
         self.historyMenu.setTitle('히스토리')
 
-        self.menuBar.addAction(self.toolsMenu.menuAction())
         self.menuBar.addAction(self.historyMenu.menuAction())
-        
+        self.menuBar.addAction(self.toolsMenu.menuAction())        
 
     def createLeftToolBox(self):
         self.selectorWidget = QTabWidget(self.mainWidget)
@@ -170,7 +168,7 @@ class FullWindow(QMainWindow):
             int(getPreferences('currentCategoryIndex')))
 
         self.getCurrentCategoryList()
-        if self.currentFood != '':
+        if self.currentFood != '' and self.currentFood is not None:
             self.setFoodInfo(self.currentFood)
 
     def createLeftSecondTab(self):
@@ -351,10 +349,10 @@ class FullWindow(QMainWindow):
         if count == 1:  # 입수처
             relatedIngredient = db.getRelatedIngredient(text)
             if len(relatedIngredient) == 0:
-                self.setStatusBarMessage('%s의 입수처가 없습니다.' % text)
+                self.setStatusBarMessage('%s은(는) 상점에서 판매하지 않습니다.' % text)
             else:
                 relatedIngredient = relatedIngredient[0] 
-                # title = '판매처 정보'
+                # title = '입수처 정보'
                 seller = ''
                 for i in range(0, 21):
                     if relatedIngredient[i + 4] == 1:

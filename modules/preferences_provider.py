@@ -3,11 +3,13 @@
 # Preferences provider for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
+import os
 from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
+from pathlib import Path
 
 # Version
-APP_VERSION = 'v0.2 beta 4'
-BUILD_NUMBER = 10
+APP_VERSION = 'v0.2 beta 5'
+BUILD_NUMBER = 11
 
 # Default preferences
 defaultPreferences = {
@@ -39,13 +41,8 @@ defaultPreferences = {
 }
 
 local_path = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
-relative_path = '\\Yuzu\\Spoon\\settings.ini'
-preferences = QSettings(local_path + relative_path, QSettings.IniFormat)
-
-# Settings watcher
-paths = [local_path + relative_path]
-watcher = QFileSystemWatcher()
-watcher.addPaths(paths)
+relative_path = '\\Yuzu\\Spoon\\'
+filename = 'settings.ini'
 
 # Initialize
 def init():
@@ -58,9 +55,17 @@ def init():
         if not preferences.contains(key):
             preferences.setValue(key, value)
 
+def makeDir(path):
+    try:
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise
+
 # Reset incompatible preferences
 def resetIncompatibles():
-    reset = ['buildNumber']
+    reset = ['buildNumber', 'currentFood', 'currentTabIndex', 
+             'currentCategoryIndex', 'currentCategoryItemIndex', 'currentFavoritesIndex']
 
     for key in reset:
         preferences.setValue(key, defaultPreferences[key])
@@ -75,3 +80,15 @@ def getPreferences(name):
         # If QSettings instance doesn't have specific props
         return defaultPreferences[name]
 
+# Create preferences file
+makeDir(local_path + relative_path)
+file = Path(local_path + relative_path + filename)
+file.touch(exist_ok = True)
+
+preferences = QSettings(local_path + relative_path + filename, QSettings.IniFormat)
+
+# Settings watcher
+paths = [local_path + relative_path + filename]
+watcher = QFileSystemWatcher()
+watcher.addPaths(paths)
+print(watcher.files())
