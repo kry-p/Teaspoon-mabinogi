@@ -3,11 +3,11 @@
 # Preferences provider for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
+from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
 # Version
-APP_VERSION = 'v0.2 beta 3'
-BUILD_NUMBER = 9
+APP_VERSION = 'v0.2 beta 4'
+BUILD_NUMBER = 10
 
 # Default preferences
 defaultPreferences = {
@@ -15,7 +15,7 @@ defaultPreferences = {
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
     'ratioDialogOpacity': 70,
-    'ratioDialogDefaultPosition': {
+    'ratioDialogPosition': {
         'x': 356,
         'y': 690
     },
@@ -29,10 +29,6 @@ defaultPreferences = {
     },
     'favorites': {
         'item': []
-    },
-    'jumpHistory': {
-        'prev': [],
-        'next': []
     },
     'ratioBarLocked': False,
     'currentTabIndex': 0,
@@ -64,7 +60,7 @@ def init():
 
 # Reset incompatible preferences
 def resetIncompatibles():
-    reset = ['buildNumber', 'jumpHistory']
+    reset = ['buildNumber']
 
     for key in reset:
         preferences.setValue(key, defaultPreferences[key])

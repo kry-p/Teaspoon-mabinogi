@@ -3,13 +3,7 @@
 # Main window for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
-                            Qt, QObject, Signal, QEvent)
-from PySide6.QtGui import (QAction, QKeySequence, QShortcut, QStandardItem, QStandardItemModel)
-from PySide6.QtWidgets import (QComboBox, QGroupBox, QLabel, QLineEdit,
-                               QListView, QMainWindow, QMenu, QMenuBar, QMessageBox,
-                               QPushButton, QRadioButton, QSizePolicy,
-                               QTabWidget, QWidget, QStatusBar)
+from PyQt5.QtCore import pyqtSignal, QObject
 
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
@@ -17,6 +11,11 @@ from .ratio_dialog import RatioDialog
 from .settings_dialog import preferences
 
 class Common():
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "_instance"):
+            cls._instance = super().__new__(cls)
+        return cls._instance   
+
     def __init__(self):
         self.settingsDialog = None
         self.ratioDialog = None
@@ -37,4 +36,16 @@ class Common():
                 self.ratioDialog.close()
             self.ratioDialog = None
 
-common = Common()
+# Customized event
+def customEvent(widget, event):
+    class Filter(QObject):
+        signal = pyqtSignal()
+        def eventFilter(self, obj, e):
+            if obj == widget and e.type() == event:
+                self.signal.emit()
+                return True
+            return False
+
+    filter = Filter(widget)
+    widget.installEventFilter(filter)
+    return filter.signal

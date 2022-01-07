@@ -83,7 +83,6 @@ class DBManager:
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
         
-
     def getFoodRatio(self, food):
         sql = 'SELECT RATIO1, RATIO2, RATIO3\
                FROM recipe\
@@ -126,6 +125,13 @@ class DBManager:
             return -1
         else:
             return response[0][0]
+
+    def getExt(self, food):
+        sql = 'SELECT ISEXT\
+               FROM recipe\
+               WHERE NAME = \'' + food + '\''
+        response = self.launchQuery(sql)
+        return self.launchQuery(sql)
 
     ''' ---------- Search ---------- '''
     def searchByIngredient(self, ingredient):

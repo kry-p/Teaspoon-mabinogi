@@ -3,10 +3,10 @@
 # Food ratio dialog for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PySide6.QtCore import (QRect, Qt)
-from PySide6.QtGui import (QCursor, QFont)
-from PySide6.QtWidgets import (QLabel, QMainWindow)
-from .preferences_provider import getPreferences, watcher
+from PyQt5.QtCore import (QRect, Qt)
+from PyQt5.QtGui import (QCursor, QFont)
+from PyQt5.QtWidgets import (QLabel, QMainWindow)
+from .preferences_provider import getPreferences, watcher, preferences
 
 rangeFont = QFont('Arial', 1)
 
@@ -20,8 +20,6 @@ class RatioDialog(QMainWindow):
         self.ratio = currentValue
 
         self.opacity = getPreferences('ratioDialogOpacity')
-        self.move(getPreferences('ratioDialogDefaultPosition')['x'],
-                  getPreferences('ratioDialogDefaultPosition')['y'])
         self.initUI()
 
     # Calculate new ratio and display
@@ -37,8 +35,10 @@ class RatioDialog(QMainWindow):
             'width': getPreferences('ratioDialogSize')['width'],
             'height': getPreferences('ratioDialogSize')['height']
         }
+        self.move(getPreferences('ratioDialogPosition')['x'],
+                  getPreferences('ratioDialogPosition')['y'])
         self.setWindowOpacity(
-            float((getPreferences('ratioDialogOpacity'))) * 0.01)
+            float(int(getPreferences('ratioDialogOpacity')) - 1) * 0.01)
         self.resize(self.currentWindowSize['width'],
                     self.currentWindowSize['height'])
         self.setFixedSize(
@@ -55,7 +55,7 @@ class RatioDialog(QMainWindow):
             list.append(perValue * ratioValue)
 
         for i in range(0, len(list)):
-            self.labels[i].setGeometry(QRect(temp, 0, temp + list[i], self.currentWindowSize['height']))
+            self.labels[i].setGeometry(QRect(int(temp), 0, int(temp + list[i]), self.currentWindowSize['height']))
             self.labels[i].setStyleSheet(
                 'background-color: ' + color[i % 2] + ';')
 
@@ -94,6 +94,13 @@ class RatioDialog(QMainWindow):
     def mouseMoveEvent(self, event):
         if Qt.LeftButton and self.m_flag:
             self.move(event.globalPos() - self.m_Position)
+            
+            geometry = self.geometry()
+            val = {
+                'x': geometry.x(),
+                'y': geometry.y()
+            }
+            preferences.setValue('ratioDialogPosition', val)
             event.accept()
 
     def mouseReleaseEvent(self, event):

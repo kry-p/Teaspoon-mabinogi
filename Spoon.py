@@ -4,10 +4,9 @@ import os
 import random
 import res
 
-from PySide6.QtWidgets import QApplication, QWidget, QStackedLayout
-from PySide6.QtCore import QCoreApplication, Qt, QSize
-from PySide6.QtGui import QIcon, QFont, QScreen
-from PySide6.QtUiTools import QUiLoader
+from PyQt5.QtWidgets import QApplication, QWidget, QStackedLayout
+from PyQt5.QtCore import QCoreApplication, Qt, QSize
+from PyQt5.QtGui import QIcon, QFont, QScreen
 
 from modules.fullwindow import FullWindow
 from modules.miniwindow import MiniWindow
@@ -19,14 +18,16 @@ if __name__ == "__main__":
         os.chdir(sys._MEIPASS)
     except:
         os.chdir(os.getcwd())
-    QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     app = QApplication([])
     font = QFont('NanumGothic')
     font.setPointSize(9)
+
     if random.randrange(1, 31) == 7:
         app.setWindowIcon(QIcon(res.icon_alt))
     else:
         app.setWindowIcon(QIcon(res.icon))
+    
     app.setFont(QFont(font))
 
     global mini

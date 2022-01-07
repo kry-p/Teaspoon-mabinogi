@@ -14,7 +14,9 @@ class Widget():
             self.widget.setText(self.prop['text'])
         if "title" in kwargs:
             self.widget.setTitle(self.prop['title'])
-        
+        if "isEnabled" in kwargs:
+            self.widget.setEnabled(self.prop['isEnabled'])
+
         if "stylesheet" in kwargs:
             self.widget.setStyleSheet(self.prop['stylesheet'])
         if "onTextChanged" in kwargs:
@@ -34,6 +36,9 @@ class Widget():
 
     def setAlignment(self, align):
         self.widget.setAlignment(align)
+
+    def setEnabled(self, isEnabled):
+        self.widget.setEnabled(isEnabled)
 
     def getWidget(self):
         return self.widget
