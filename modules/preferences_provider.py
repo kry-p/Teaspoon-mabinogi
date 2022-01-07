@@ -6,8 +6,8 @@
 from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 
 # Version
-APP_VERSION = 'v0.2 beta 4'
-BUILD_NUMBER = 10
+APP_VERSION = 'v0.2 beta 5'
+BUILD_NUMBER = 11
 
 # Default preferences
 defaultPreferences = {
@@ -39,7 +39,12 @@ defaultPreferences = {
 }
 
 local_path = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
-relative_path = '\\Yuzu\\Spoon\\settings.ini'
+relative_path = '/Yuzu/Spoon/settings.ini'
+
+# Create preferences file
+file = open(local_path + relative_path, 'w')
+file.close()
+
 preferences = QSettings(local_path + relative_path, QSettings.IniFormat)
 
 # Settings watcher
@@ -60,7 +65,8 @@ def init():
 
 # Reset incompatible preferences
 def resetIncompatibles():
-    reset = ['buildNumber']
+    reset = ['buildNumber', 'currentFood', 'currentTabIndex', 
+             'currentCategoryIndex', 'currentCategoryItemIndex', 'currentFavoritesIndex']
 
     for key in reset:
         preferences.setValue(key, defaultPreferences[key])
@@ -74,4 +80,3 @@ def getPreferences(name):
     else:
         # If QSettings instance doesn't have specific props
         return defaultPreferences[name]
-
