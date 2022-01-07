@@ -91,4 +91,3 @@ preferences = QSettings(local_path + relative_path + filename, QSettings.IniForm
 paths = [local_path + relative_path + filename]
 watcher = QFileSystemWatcher()
 watcher.addPaths(paths)
-print(watcher.files())
