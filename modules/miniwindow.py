@@ -4,12 +4,13 @@
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 
-from PyQt5.QtCore import (QMetaObject, QRect, QSize, Qt)
-from PyQt5.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu, 
-                               QMenuBar, QPushButton, QWidget, QAction)
+from PyQt5.QtCore import (QEvent, QMetaObject, QRect, QSize, Qt)
+from PyQt5.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow, 
+                             QMenu, QMenuBar, QPushButton, QWidget,
+                             QAction)
 
 from modules.elements import Widget
-from .preferences_provider import watcher, preferences, getPreferences
+from .preferences_provider import (preferences, getPreferences)
 from .common import Common
 
 PERCENT_COLOR = '#AAAAAA'
@@ -17,7 +18,7 @@ NAME_LABEL_STYLESHEET = 'font-weight: 600;'
 
 # Mini window
 class MiniWindow(QMainWindow):
-    def __init__(self, APP_VERSION):
+    def __init__(self, APP_VERSION : str) -> None:
         super().__init__()
 
         # Settings for window
@@ -97,21 +98,21 @@ class MiniWindow(QMainWindow):
         self.ratioBarButton.getWidget().clicked.connect(lambda : self.common.toggleRatioDialog(self.stuffRatioInputs))
 
     # Set full ver.
-    def setFullWindow(self, window):
+    def setFullWindow(self, window : QWidget) -> None:
         self.full = window
 
     # Change window
-    def changeMainDialog(self):
+    def changeMainDialog(self) -> None:
         self.full.show()
         self.close()
 
     # UI elements
-    def toggleRatioBarLocked(self):
+    def toggleRatioBarLocked(self) -> None:
         preferences.setValue('ratioBarLocked',
                             self.actions['lockRatio'].getWidget().isChecked())
   
     """ ----------- Events ----------- """
-    def closeEvent(self, event):
+    def closeEvent(self, event : QEvent) -> None:
         if self.common.ratioDialog:
             self.common.ratioDialog.close()
         if self.common.settingsDialog:

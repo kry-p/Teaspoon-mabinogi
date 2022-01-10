@@ -8,11 +8,11 @@ from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 from pathlib import Path
 
 # Version
-APP_VERSION = 'v0.2 beta 5'
-BUILD_NUMBER = 11
+APP_VERSION : str = 'v0.2 beta 5'
+BUILD_NUMBER : int = 11
 
 # Default preferences
-defaultPreferences = {
+defaultPreferences : dict = { 
     'buildNumber': BUILD_NUMBER,
     'color': ['#FFFF00', '#FF0000', '#FFFF00'],
     'initialWindowExpanded': True,
@@ -40,12 +40,12 @@ defaultPreferences = {
     'currentFood': '',
 }
 
-local_path = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
-relative_path = '\\Yuzu\\Spoon\\'
-filename = 'settings.ini'
+LOCAL_PATH : str = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
+RELATIVE_PATH : str = '\\Yuzu\\Spoon\\'
+FILENAME : str = 'settings.ini'
 
 # Initialize
-def init():
+def initPreferences() -> None:
     # if preferences based on previous build
     if not preferences.contains('buildNumber') or int(getPreferences('buildNumber')) < BUILD_NUMBER:
         resetIncompatibles()
@@ -55,7 +55,8 @@ def init():
         if not preferences.contains(key):
             preferences.setValue(key, value)
 
-def makeDir(path):
+# Make directory that not exists
+def makeDir(path: str) -> None:
     try:
         os.makedirs(path)
     except OSError:
@@ -63,7 +64,7 @@ def makeDir(path):
             raise
 
 # Reset incompatible preferences
-def resetIncompatibles():
+def resetIncompatibles() -> None:
     reset = ['buildNumber', 'currentFood', 'currentTabIndex', 
              'currentCategoryIndex', 'currentCategoryItemIndex', 'currentFavoritesIndex']
 
@@ -71,7 +72,7 @@ def resetIncompatibles():
         preferences.setValue(key, defaultPreferences[key])
     
 # Read from QSettings
-def getPreferences(name):
+def getPreferences(name) -> None:
     pref = preferences.value(name)
 
     if pref:
@@ -81,13 +82,13 @@ def getPreferences(name):
         return defaultPreferences[name]
 
 # Create preferences file
-makeDir(local_path + relative_path)
-file = Path(local_path + relative_path + filename)
+makeDir(LOCAL_PATH + RELATIVE_PATH)
+file = Path(LOCAL_PATH + RELATIVE_PATH + FILENAME)
 file.touch(exist_ok = True)
 
-preferences = QSettings(local_path + relative_path + filename, QSettings.IniFormat)
+preferences = QSettings(LOCAL_PATH + RELATIVE_PATH + FILENAME, QSettings.IniFormat)
 
 # Settings watcher
-paths = [local_path + relative_path + filename]
+paths = [LOCAL_PATH + RELATIVE_PATH + FILENAME]
 watcher = QFileSystemWatcher()
 watcher.addPaths(paths)

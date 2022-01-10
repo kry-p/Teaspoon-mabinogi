@@ -9,17 +9,19 @@ from PyQt5.QtGui import (QIntValidator)
 from PyQt5.QtWidgets import (QLabel, QLineEdit, QMainWindow, QPushButton,
                                QRadioButton, QSizePolicy, QTabWidget, QWidget,
                                QMessageBox, QSlider, QColorDialog)
-from .preferences_provider import preferences, watcher, getPreferences
+from .preferences_provider import (preferences, watcher, getPreferences)
 from .elements import Widget
 
 STYLE_BOLD = 'font-weight: 600;'
+WINDOW_WIDTH = 320
+WINDOW_HEIGHT = 250
 
 # Settings dialog
 class SettingsDialog(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.resize(320, 250)
-        self.setFixedSize(QSize(320, 250))
+        self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.setFixedSize(QSize(WINDOW_WIDTH, WINDOW_HEIGHT))
         
         # Settings watcher
         watcher.fileChanged.connect(self.onFileChanged)
@@ -115,11 +117,11 @@ class SettingsDialog(QMainWindow):
             'colorSelect0': Widget(widget = QPushButton(self.barOption),
                                    geometry = QRect(170, 75, 61, 30),
                                    text = '선택',
-                                   onClick = self.onColorPickerOpened0),
+                                   onClick = lambda : self.onColorPickerOpened(0)),
             'colorSelect1': Widget(widget = QPushButton(self.barOption),
                                    geometry = QRect(170, 105, 61, 30),
                                    text = '선택',
-                                   onClick = self.onColorPickerOpened1),
+                                   onClick = lambda : self.onColorPickerOpened(1)),
             'resetFavorites': Widget(widget = QPushButton(self.miscOption),
                                      geometry = QRect(110, 55, 71, 31), 
                                      text = '초기화',
@@ -170,16 +172,16 @@ class SettingsDialog(QMainWindow):
         QMetaObject.connectSlotsByName(self)
 
     ''' --------------- actions --------------- '''
-    def onRadioButtonClicked(self):
+    def onRadioButtonClicked(self) -> None:
         if self.radio['mainWindowMini'].getWidget().isChecked():
             preferences.setValue('initialWindowExpanded', False)
         else:
             preferences.setValue('initialWindowExpanded', True)
 
-    def onOpacityChanged(self):
+    def onOpacityChanged(self) -> None:
         preferences.setValue('ratioDialogOpacity', self.opacitySlider.value())
     
-    def onRatioBarSizeChanged(self):
+    def onRatioBarSizeChanged(self) -> None:
         val = getPreferences('ratioDialogSize')
         next = [
             self.input['ratioBarWidth'].getWidget(),
@@ -199,7 +201,7 @@ class SettingsDialog(QMainWindow):
                     val['height'] = int(next[idx].text())
         preferences.setValue('ratioDialogSize', val)
 
-    def onRatioBarPositionChanged(self):
+    def onRatioBarPositionChanged(self) -> None:
         val = getPreferences('ratioDialogPosition')
         widget = [self.input['ratioBarXPos'].getWidget(), 
                   self.input['ratioBarYPos'].getWidget()]
@@ -214,25 +216,21 @@ class SettingsDialog(QMainWindow):
     
         preferences.setValue('ratioDialogPosition', val)
 
-    def onColorChanged(self):
+    def onColorChanged(self) -> None:
         val = getPreferences('ratioBarColor')
         for i in range(len(val)):
             val[i] = self.input['ratioBarColor%d' % i].getWidget().text()
         preferences.setValue('ratioBarColor', val)
-
-    def onColorPickerOpened0(self):
+    
+    def onColorPickerOpened(self, pos : int) -> None:
         pick = QColorDialog.getColor()
-        self.input['ratioBarColor0'].getWidget().setText(pick.name())
+        self.input['ratioBarColor%d' % pos].getWidget().setText(pick.name())
 
-    def onColorPickerOpened1(self):
-        pick = QColorDialog.getColor()
-        self.input['ratioBarColor1'].getWidget().setText(pick.name())
-
-    def onResetFavorites(self):
+    def onResetFavorites(self) -> None:
         preferences.setValue('favorites', [])
 
     # If QSettings file has changed
-    def onFileChanged(self):
+    def onFileChanged(self) -> None:
         # Detects 
         pref = getPreferences('ratioDialogPosition')
         self.input['ratioBarXPos'].getWidget().setText(str(pref['x']))

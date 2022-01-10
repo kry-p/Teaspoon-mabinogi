@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 '''
-# Main window for Spoon
+# Common elements and events for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtCore import (QEvent, pyqtSignal, QObject)
 
-from .settings_dialog import SettingsDialog
+from .settings_dialog import (SettingsDialog, preferences)
 from .ratio_dialog import RatioDialog
-
-from .settings_dialog import preferences
 
 class Common():
     def __new__(cls, *args, **kwargs):
@@ -16,16 +14,16 @@ class Common():
             cls._instance = super().__new__(cls)
         return cls._instance   
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.settingsDialog = None
         self.ratioDialog = None
 
-    def openSettingsDialog(self):
+    def openSettingsDialog(self) -> None:
         if self.settingsDialog is None:
             self.settingsDialog = SettingsDialog()
         self.settingsDialog.show()
 
-    def toggleRatioDialog(self, inputs):
+    def toggleRatioDialog(self, inputs : list) -> None:
         data = list(map(lambda value: 0 if value.text() ==
                         '' else int(value.text()), inputs))
         test = sum(data)
@@ -37,10 +35,10 @@ class Common():
             self.ratioDialog = None
 
 # Customized event
-def customEvent(widget, event):
+def customEvent(widget, event : QEvent):
     class Filter(QObject):
         signal = pyqtSignal()
-        def eventFilter(self, obj, e):
+        def eventFilter(self, obj, e) -> bool:
             if obj == widget and e.type() == event:
                 self.signal.emit()
                 return True

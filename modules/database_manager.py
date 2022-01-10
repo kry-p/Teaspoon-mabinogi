@@ -31,12 +31,17 @@ RECIPE_MILESTONE['categoryCode'].reverse()
 
 # Wrapper class
 class DBManager:
-    def __init__(self):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "_instance"):
+            cls._instance = super().__new__(cls)
+        return cls._instance   
+
+    def __init__(self) -> None:
         self.data = sqlite3.connect(DB_PATH)
         self.cursor = self.data.cursor()
 
     # query
-    def launchQuery(self, sql):
+    def launchQuery(self, sql : str):
         try:
             self.cursor.execute(sql)
             response =  {
@@ -56,11 +61,11 @@ class DBManager:
 
     ''' ---------- SELECT ---------- '''
     # Pre-specified categories
-    def getCategories(self):
+    def getCategories(self) -> list:
         return RECIPE_MILESTONE
 
     # Foods list
-    def getFoods(self, category):
+    def getFoods(self, category : str) -> list:
         sql = "SELECT NAME, ISEXT FROM recipe WHERE RANK = '%s'" % category
         return list(map(list, self.launchQuery(sql)))
 
@@ -68,7 +73,7 @@ class DBManager:
     # ingredients: 재료 1, 재료 2, 재료 3
     # specialEffects: 
     # stats: 스테이터스 효과
-    def getFoodInfo(self, food):
+    def getFoodInfo(self, food : str) -> dict:
         result = {
             'ingredients': self.getFoodIngredients(food),
             'ratio': self.getFoodRatio(food),
@@ -77,25 +82,25 @@ class DBManager:
         }
         return result
 
-    def getFoodIngredients(self, food):
+    def getFoodIngredients(self, food : str):
         sql = 'SELECT INGREDIENT1, INGREDIENT2, INGREDIENT3\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
         
-    def getFoodRatio(self, food):
+    def getFoodRatio(self, food : str):
         sql = 'SELECT RATIO1, RATIO2, RATIO3\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
 
-    def getFoodSfx(self, food):
+    def getFoodSfx(self, food : str):
         sql = 'SELECT SPECIALFX, SFXDESC\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
 
-    def getFoodStats(self, food):
+    def getFoodStats(self, food : str):
         sql = 'SELECT STR, INT, DEX, WIL, LUC,\
                       HP, MP, SP,\
                       MINDAM, MAXDAM,\
@@ -104,19 +109,19 @@ class DBManager:
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)
 
-    def getRelatedRecipe(self, food):
+    def getRelatedRecipe(self, food : str):
         sql = 'SELECT NAME\
                FROM recipe\
                WHERE NAME = \'' + food + '\''
         return self.launchQuery(sql)
     
-    def getRelatedIngredient(self, food):
+    def getRelatedIngredient(self, food : str):
         sql = 'SELECT *\
                FROM ingredient\
                WHERE NAME = \'' + food + '\''
         return self.launchQuery(sql)
 
-    def getRank(self, food):
+    def getRank(self, food : str):
         sql = 'SELECT RANK\
                FROM recipe\
                WHERE NAME = \'' + food + '\''
@@ -126,7 +131,7 @@ class DBManager:
         else:
             return response[0][0]
 
-    def getExt(self, food):
+    def getExt(self, food : str):
         sql = 'SELECT ISEXT\
                FROM recipe\
                WHERE NAME = \'' + food + '\''
@@ -134,7 +139,7 @@ class DBManager:
         return self.launchQuery(sql)
 
     ''' ---------- Search ---------- '''
-    def searchByIngredient(self, ingredient):
+    def searchByIngredient(self, ingredient : str):
         sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE INGREDIENT1 LIKE \'%' + ingredient + '%\'\
@@ -142,13 +147,13 @@ class DBManager:
                   OR INGREDIENT3 LIKE \'%' + ingredient + '%\''
         return self.launchQuery(sql)
 
-    def searchByName(self, name):
+    def searchByName(self, name : str):
         sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE NAME LIKE \'%' + name + '%\''
         return self.launchQuery(sql)
     
-    def searchByEffect(self, query):
+    def searchByEffect(self, query : str):
         constraiants = ''
         for i in range(len(query)):
             if i % 2 == 1:

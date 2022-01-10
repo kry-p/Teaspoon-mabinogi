@@ -3,8 +3,10 @@
 # QWidget wrapper class for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
+from PyQt5.QtWidgets import QWidget
+
 class Widget():
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.prop = kwargs
         self.widget = self.prop['widget']
 
@@ -28,17 +30,17 @@ class Widget():
         if "onClick" in kwargs:
             self.widget.clicked.connect(self.prop['onClick'])
 
-    def setText(self, text):
+    def setText(self, text : str) -> None:
         self.widget.setText(text)
 
-    def setStyleSheet(self, style):
+    def setStyleSheet(self, style : str) -> None:
         self.widget.setStyleSheet(style)
 
-    def setAlignment(self, align):
+    def setAlignment(self, align : str) -> None:
         self.widget.setAlignment(align)
 
-    def setEnabled(self, isEnabled):
+    def setEnabled(self, isEnabled : bool) -> None:
         self.widget.setEnabled(isEnabled)
 
-    def getWidget(self):
+    def getWidget(self) -> QWidget:
         return self.widget

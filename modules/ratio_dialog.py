@@ -3,30 +3,38 @@
 # Food ratio dialog for Spoon
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
-from PyQt5.QtCore import (QRect, Qt)
+from PyQt5.QtCore import (QEvent, QRect, Qt)
 from PyQt5.QtGui import (QCursor, QFont)
 from PyQt5.QtWidgets import (QLabel, QMainWindow)
-from .preferences_provider import getPreferences, watcher, preferences
+from .preferences_provider import (getPreferences, preferences)
 
-rangeFont = QFont('Arial', 1)
+RANGE_FONT = QFont('Arial', 1)
 
 # Ratio bar window
 class RatioDialog(QMainWindow):
-    def __init__(self, currentValue):
+    def __init__(self, currentValue : list) -> None:
         super().__init__()
         self.setWindowTitle('비율')
-        self.m_flag = False
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.mouseFlag : bool = False
         self.ratio = currentValue
 
         self.opacity = getPreferences('ratioDialogOpacity')
         self.initUI()
 
+    # Initialize UI elements
+    def initUI(self) -> None:
+        self.labels = [QLabel('', self), QLabel('', self), QLabel('', self)]
+        for label in self.labels:
+            label.setFont(RANGE_FONT)
+        self.draw()
+        self.show()
+
     # Calculate new ratio and display
-    def draw(self):
+    def draw(self) -> None:
         list = []
-        sum = 0
-        temp = 0
+        sum : int = 0
+        temp : int = 0
         
         # Get preferences
         color = getPreferences('ratioBarColor')
@@ -56,43 +64,28 @@ class RatioDialog(QMainWindow):
 
         for i in range(0, len(list)):
             self.labels[i].setGeometry(QRect(int(temp), 0, int(temp + list[i]), self.currentWindowSize['height']))
-            self.labels[i].setStyleSheet(
-                'background-color: ' + color[i % 2] + ';')
-
+            self.labels[i].setStyleSheet('background-color: \'%s\';' % color[i % 2])
             temp += list[i]
         
         for i in range(len(list), 3):
-            self.labels[i].setStyleSheet(
-                'background-color: rgba(255, 255, 255, 0);')
+            self.labels[i].setStyleSheet('background-color: rgba(255, 255, 255, 0);')
 
     # Set new ratio value
-    def update(self, newValue):
+    def update(self, newValue : list) -> None:
         self.ratio = newValue
         self.draw()
 
-    # Initialize UI elements
-    def initUI(self):
-        self.labels = [
-            QLabel('', self),
-            QLabel('', self),
-            QLabel('', self),
-        ]
-        for label in self.labels:
-            label.setFont(rangeFont)
-        self.draw()
-        self.show()
-
     # Mouse event
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event : QEvent) -> None:
         ratioBarLocked = getPreferences('ratioBarLocked')
         if event.button() == Qt.LeftButton and (ratioBarLocked == 'false' or ratioBarLocked == False):
-            self.m_flag = True
+            self.mouseFlag = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
             self.setCursor(QCursor(Qt.OpenHandCursor))
 
-    def mouseMoveEvent(self, event):
-        if Qt.LeftButton and self.m_flag:
+    def mouseMoveEvent(self, event : QEvent) -> None:
+        if Qt.LeftButton and self.mouseFlag:
             self.move(event.globalPos() - self.m_Position)
             
             geometry = self.geometry()
@@ -103,6 +96,6 @@ class RatioDialog(QMainWindow):
             preferences.setValue('ratioDialogPosition', val)
             event.accept()
 
-    def mouseReleaseEvent(self, event):
-        self.m_flag = False
+    def mouseReleaseEvent(self, event : QEvent) -> None:
+        self.mouseFlag = False
         self.setCursor(QCursor(Qt.ArrowCursor))
