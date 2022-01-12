@@ -620,11 +620,15 @@ class FullWindow(QMainWindow):
         statValues = self.statValue + self.chrValue\
                 + self.atkValue + self.defValue
         info = db.getFoodInfo(foodName)
+        rank = db.getRank(foodName)
         ingredients = info['ingredients'][0]
         ratio = info['ratio'][0]
         special = info['specialEffects'][0]
         stats = info['stats'][0]
+        rankString = CATEGORIES['categoryName'][CATEGORIES['categoryCode'].index(rank)]
         isRelated = list()
+
+        self.ratioBox.setTitle(foodName + ' : ' + rankString + '  ')
 
         for ingredient in ingredients:            
             if ingredient is None:
