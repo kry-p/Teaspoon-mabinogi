@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QGroupBox, QLabel, QLineEdit, QMainWindow,
                              QAction)
 
 from modules.elements import Widget
-from .preferences_provider import (preferences, getPreferences)
+from .preferences_provider import (preferences, getPreferences, watcher)
 from .common import Common
 
 PERCENT_COLOR = '#AAAAAA'
@@ -20,6 +20,9 @@ NAME_LABEL_STYLESHEET = 'font-weight: 600;'
 class MiniWindow(QMainWindow):
     def __init__(self, APP_VERSION : str) -> None:
         super().__init__()
+
+        # Settings watcher
+        watcher.fileChanged.connect(self.fileChangeEvent)
 
         # Settings for window
         self.APP_VERSION = APP_VERSION
@@ -82,9 +85,11 @@ class MiniWindow(QMainWindow):
 
         # Stuff inputs
         self.stuffRatioInputs = [QLineEdit(self.ratioBox), QLineEdit(self.ratioBox), QLineEdit(self.ratioBox)]
+        
         for i in range(len(self.stuffRatioInputs)):
             self.stuffRatioInputs[i].setGeometry(QRect(95, (20 + 30 * i), 41, 20))
-        
+            self.stuffRatioInputs[i].setAlignment(Qt.AlignRight)
+            self.stuffRatioInputs[i].setInputMask('000')
         self.ratioBarButton = Widget(widget = QPushButton(self.centralWidget),
                                      geometry = QRect(10, 130, 171, 31),
                                      text = '비율 바 On / Off')
@@ -96,6 +101,8 @@ class MiniWindow(QMainWindow):
         self.actions['lockRatio'].getWidget().triggered.connect(self.toggleRatioBarLocked)
         self.actions['settings'].getWidget().triggered.connect(self.common.openSettingsDialog)
         self.ratioBarButton.getWidget().clicked.connect(lambda : self.common.toggleRatioDialog(self.stuffRatioInputs))
+        for item in self.stuffRatioInputs:
+            item.textChanged.connect(lambda : self.common.updateRatioDialog(self.stuffRatioInputs))
 
     # Set full ver.
     def setFullWindow(self, window : QWidget) -> None:
@@ -112,6 +119,11 @@ class MiniWindow(QMainWindow):
                             self.actions['lockRatio'].getWidget().isChecked())
   
     """ ----------- Events ----------- """
+    # If QSettings file has changed
+    def fileChangeEvent(self) -> None:
+        if self.common.ratioDialog is not None and self.isVisible():
+            self.common.updateRatioDialog(self.stuffRatioInputs)
+
     def closeEvent(self, event : QEvent) -> None:
         if self.common.ratioDialog:
             self.common.ratioDialog.close()

@@ -4,6 +4,7 @@
 # https://github.com/kry-p/Teaspoon-mabinogi
 '''
 import math
+import re
 from enum import Enum
 from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
                             Qt, QEvent)
@@ -132,6 +133,11 @@ class FullWindow(QMainWindow):
 
         self.historyMenu = QMenu(self.menuBar)
         self.historyMenu.setTitle('히스토리')
+        self.dummyAction = QAction()
+        self.dummyAction.setEnabled(False)
+        self.dummyAction.setText('(비어 있음)')
+
+        self.historyMenu.addAction(self.dummyAction)
 
         self.menuBar.addAction(self.historyMenu.menuAction())
         self.menuBar.addAction(self.toolsMenu.menuAction())        
@@ -210,8 +216,8 @@ class FullWindow(QMainWindow):
 
     def createStuffBox(self) -> None:
         def createClickEvent(widget, idx : int) -> None:
-            customEvent(widget, QEvent.MouseButtonPress).connect(lambda : self.onRecipeItemClicked(idx, 1))
-            customEvent(widget, QEvent.MouseButtonDblClick).connect(lambda : self.onRecipeItemClicked(idx, 2))
+            customEvent(widget, QEvent.MouseButtonPress).connect(lambda : self.recipeItemClicked(idx, 1))
+            customEvent(widget, QEvent.MouseButtonDblClick).connect(lambda : self.recipeItemClicked(idx, 2))
 
         self.ratioBox = QGroupBox(self.mainWidget)
         self.ratioBox.setGeometry(QRect(215, 10, 295, 121))
@@ -343,7 +349,7 @@ class FullWindow(QMainWindow):
             return -1
     
     # When stuff item selected
-    def onRecipeItemClicked(self, pos : int, count : int) -> None:
+    def recipeItemClicked(self, pos : int, count : int) -> None:
         text = self.stuffNames[pos].text().replace(' *', '')
         temp = getPreferences('currentFood')
 
@@ -428,27 +434,53 @@ class FullWindow(QMainWindow):
                 except:
                     result = None
             if currentEnabled == 1:
-                query = list()
                 categories = ["체력", "지력", "솜씨", "의지", "행운",
                               "HP", "MP", "SP",
                               "민댐", "맥댐", "마공",
                               "방어", "보호", "마방", "마보", "효과"]
-                text = [item for item in currentText.split(' ') if item != '']
-                try:
-                    for i in range(len(text)):
-                        if i % 2 == 1:
-                            oper = text[i]
-                            if oper.lower() == 'and' or oper.lower() == 'or':
-                                query.append(oper.upper())
-                            else:
-                                raise Exception
+                categoryCol = list(reversed(CATEGORIES['effectColumns']))
+                query = dict()
+                
+                def syntaxErrorChecker(queryItems : list):
+                    logic = list()
+                    for item in text:
+                        if item.lower() == 'and' or item.lower() == 'or':
+                            # put in logical operation string (upper case)
+                            logic.append(text.pop(text.index(item)).upper())  
+
+                    query['logic'] = logic
+                    # unknown categories
+                    for item in queryItems:
+                        if not item.isdigit() and item not in categories:
+                            return False
+
+                    # numbers
+                    numberCount = 0
+                    for i in range(len(queryItems)):
+                        if queryItems[i].isdigit():
+                            numberCount += 1
                         else:
-                            query.append(CATEGORIES['effectColumns'][15 - categories.index(text[i])])
-                    if len(query) % 2 == 0:
-                        raise Exception
+                            if numberCount != 0 and numberCount != 2:
+                                return False
+                            if i != 0:
+                                query[categoryCol[categories.index(queryItems[i - numberCount - 1])]] = queryItems[i - numberCount : i]
+                            numberCount = 0
+                        if i == len(queryItems) - 1:
+                            if numberCount != 0 and numberCount != 2:
+                                return False
+                            query[categoryCol[categories.index(queryItems[(i - numberCount)])]] = queryItems[i - numberCount + 1 : i + 1]
+                    
+                    if len(query) - len(query['logic']) == 2:
+                        return True
+                    else:
+                        return False
+            
+                text = [item for item in re.split(r'[ ~]', currentText) if item != '']
+
+                if syntaxErrorChecker(text):
                     result = db.searchByEffect(query)
                     self.setStatusBarMessage('')
-                except:
+                else:
                     self.setStatusBarMessage('검색어를 잘못 입력했습니다. 정확하게 입력했는지 확인해 주세요.')
             if currentEnabled == 2:
                 try:
@@ -561,9 +593,6 @@ class FullWindow(QMainWindow):
 
         if self.isInit:
             self.isInit = False
-            self.historyMenu.clear()
-            emptyAction = Widget(widget = QAction(self), text = '비어 있음', isEnabled = False)
-            self.historyMenu.addAction(emptyAction.getWidget())
         else:    
             self.historyMenu.clear()  
             
@@ -574,18 +603,18 @@ class FullWindow(QMainWindow):
                 self.history.remove(food)
                 self.history.append(food)
 
-            self.history.reverse()
-
             if len(self.history) > 10:
                 self.history.remove(self.history[0])
             actions = list()
-            for i in range(len(self.history)):
+            for i in reversed(range(len(self.history))):
                 action = QAction(self)
                 action.setText(self.history[i])
                 action.setEnabled(True)
                 actions.append(action)
+
+            for i in range(len(actions)):
                 self.historyMenu.addAction(actions[i])
-                trigger(actions[i], i)        
+                trigger(actions[i], i)     
         
     def setFoodInfo(self, foodName : str) -> None:
         statValues = self.statValue + self.chrValue\
@@ -624,13 +653,13 @@ class FullWindow(QMainWindow):
 
         for idx in range(len(statValues)):
             val = stats[idx]
-
-            statValues[idx].setText('' if stats[idx] is None else str(int(stats[idx])))
+            statValues[idx].setText('' if stats[idx] == 0 else str(int(stats[idx])))
             
-            if val is not None and int(val) > 0:
-                statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
-            else:
-                statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
+            if val is not None:
+                if int(val) > 0:
+                    statValues[idx].setStyleSheet('color: %s;' % COLOR_POSITIVE)
+                elif int(val) < 0:
+                    statValues[idx].setStyleSheet('color: %s;' % COLOR_NEGATIVE)
 
     # UI elements
     def toggleRatioBarLocked(self) -> None:
@@ -646,10 +675,8 @@ class FullWindow(QMainWindow):
             if len(favorites) == 0:
                 self.favorites = []
                 self.updateFavorite()
-        if self.common.ratioDialog is not None:
-            data = list(map(lambda value: 0 if value.text() ==
-                '' else int(value.text()), self.stuffRatioInputs))
-            self.common.ratioDialog.update(data)
+        if self.common.ratioDialog is not None and self.isVisible():
+            self.common.updateRatioDialog(self.stuffRatioInputs)
 
     # If close button clicked
     def closeEvent(self, event : QEvent) -> None:
@@ -660,9 +687,8 @@ class FullWindow(QMainWindow):
 
     # Keyboard listener
     def keyPressEvent(self, event : QEvent) -> None:
-        if self.selectorWidget.currentIndex() == 1:
-            if event.key() == Qt.Key_Return:
-                self.searchButton.click()
+        if self.selectorWidget.currentIndex() and event.key() == Qt.Key_Return:
+            self.searchButton.click()
 
     """ -------- Translations -------- """
     def retranslateUi(self) -> None:

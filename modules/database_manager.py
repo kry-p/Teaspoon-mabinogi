@@ -153,14 +153,30 @@ class DBManager:
                WHERE NAME LIKE \'%' + name + '%\''
         return self.launchQuery(sql)
     
-    def searchByEffect(self, query : str):
+    def searchByEffect(self, query : dict):
         constraiants = ''
-        for i in range(len(query)):
-            if i % 2 == 1:
-                constraiants += " %s " % query[i]
+        logic = query['logic']
+        del(query['logic'])
+        idx : int = 0
+        
+        for key, value in query.items():
+            if key == 'SPECIALFX':
+                if idx < len(query) - 1:
+                    constraiants += ' %s NOT NULL' % key + ' %s' % logic[idx]
+                else:
+                    constraiants += ' %s NOT NULL' % key
+            elif len(value) == 0:
+                if idx < len(query) - 1:
+                    constraiants += ' %s != 0' % key + ' %s' % logic[idx]
+                else:
+                    constraiants += ' %s != 0' % key
             else:
-                constraiants += "%s NOT NULL" % query[i]
-
+                if idx < len(query) - 1:
+                    constraiants += ' %s BETWEEN ' % key + value[0] + ' AND ' + value[1] + ' %s' % logic[idx]
+                else:
+                    constraiants +=' %s BETWEEN ' % key + value[0] + ' AND ' + value[1]
+            idx += 1
+            
         sql = 'SELECT NAME, ISEXT\
                FROM recipe\
                WHERE %s' % constraiants

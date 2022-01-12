@@ -5,7 +5,7 @@
 '''
 from PyQt5.QtCore import (QEvent, pyqtSignal, QObject)
 
-from .settings_dialog import (SettingsDialog, preferences)
+from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 
 class Common():
@@ -26,13 +26,19 @@ class Common():
     def toggleRatioDialog(self, inputs : list) -> None:
         data = list(map(lambda value: 0 if value.text() ==
                         '' else int(value.text()), inputs))
-        test = sum(data)
-        if self.ratioDialog is None and test != 0:
+        if self.ratioDialog is None and sum(data) != 0:
             self.ratioDialog = RatioDialog(data)
         else:
             if self.ratioDialog is not None:
                 self.ratioDialog.close()
             self.ratioDialog = None
+
+    def updateRatioDialog(self, inputs : list) -> None:
+        if self.ratioDialog is not None:
+            data = list(map(lambda value: 0 if value.text() ==
+                        '' else int(value.text()), inputs))
+            if sum(data) != 0:
+                self.ratioDialog.update(data)
 
 # Customized event
 def customEvent(widget, event : QEvent):
