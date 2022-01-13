@@ -586,10 +586,10 @@ class FullWindow(QMainWindow):
     ''' Misc '''
     def addToHistory(self, food : str) -> None:
         def trigger(action, index : int) -> None:
-            def run():
-                self.setStatusBarMessage('%s의 레시피입니다.' % self.history[index])
-                self.jumpToFood(self.history[index])
-            action.triggered.connect(lambda : run())
+            def run(action, index):
+                self.setStatusBarMessage('%s의 레시피입니다.' % action.text())
+                self.jumpToFood(self.history[self.history.index(action.text())])
+            action.triggered.connect(lambda : run(action, index))
 
         if self.isInit:
             self.isInit = False
