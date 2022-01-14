@@ -21,9 +21,12 @@ RECIPE_MILESTONE = {
                         'HP', 'MP', 'SP',
                         'MINDAM', 'MAXDAM',
                         'MATK', 'DEF', 'PRT', 'MDEF', 'MPRT', 'SPECIALFX'],
-    'npcList': ['케이틴', '글라니스', '고든', '프레이저', '셰나', '루카스', '제니퍼', '에피',
-                '글라니테스', '반스트', '루와이', '피에릭', '글루아스', '카독', '아닉',
-                '바날렌', '배리', '메이드', '교역', '렘 / 람', '마차']
+    # 'npcList': ['케이틴', '글라니스', '고든', '프레이저', '셰나', '루카스', '제니퍼', '에피',
+    #             '글라니테스', '반스트', '루와이', '피에릭', '글루아스', '카독', '아닉',
+    #             '바날렌', '배리', '메이드', '교역', '렘 / 람', '마차']
+    'npcList': ['식료품점', '글라니스', '고든', '프레이저', '셰나', '루카스', '글루아스',
+                '반스트', '아닉', '카독', '바날렌', '배리', '메이드', '교역', '렘 / 람',
+                '마차', '채집', '드랍', '퀘스트', '제작']
 }
 RECIPE_MILESTONE['categoryName'].reverse()
 RECIPE_MILESTONE['effectColumns'].reverse()
@@ -95,7 +98,7 @@ class DBManager:
         return self.launchQuery(sql)
 
     def getFoodSfx(self, food : str):
-        sql = 'SELECT SPECIALFX, SFXDESC\
+        sql = 'SELECT SPECIALFX1, SPECIALFX2, SFXDESC1, SFXDESC2\
                FROM recipe\
                WHERE NAME = \'%s\'' % food
         return self.launchQuery(sql)

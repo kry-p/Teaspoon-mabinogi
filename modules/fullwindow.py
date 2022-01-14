@@ -33,11 +33,11 @@ class ChangeOrderType(Enum):
 
 # Main window (Full)
 class FullWindow(QMainWindow):
-    def __init__(self, version : str) -> None:
+    def __init__(self, version : str, resources) -> None:
         super().__init__()
 
         self.version = version
-        self.common = Common()
+        self.common = Common(resources)
         self.currentFood = getPreferences('currentFood')
         self.favorites = [] if getPreferences('favorites')['item'] is None else getPreferences('favorites')['item']
 
@@ -89,6 +89,7 @@ class FullWindow(QMainWindow):
         self.actions['settings'].triggered.connect(self.common.openSettingsDialog)
         self.actions['lockRatio'].triggered.connect(self.toggleRatioBarLocked)
         self.actions['changeMode'].triggered.connect(self.changeMainDialog)
+        self.actions['help'].triggered.connect(self.common.openHelpDialog)
        
         ''' Misc. operations '''
         self.selectorWidget.setCurrentIndex(int(getPreferences('currentTabIndex')))
@@ -123,7 +124,7 @@ class FullWindow(QMainWindow):
         self.actions['lockRatio'].setCheckable(True)
         self.actions['lockRatio'].setChecked(
             True if getPreferences('ratioBarLocked') == 'true' else False)
-        self.actions['help'].setEnabled(False)
+        # self.actions['help'].setEnabled(False)
 
         self.toolsMenu.addAction(self.actions['lockRatio'])
         self.toolsMenu.addAction(self.actions['changeMode'])
@@ -351,22 +352,26 @@ class FullWindow(QMainWindow):
     # When stuff item selected
     def recipeItemClicked(self, pos : int, count : int) -> None:
         text = self.stuffNames[pos].text().replace(' *', '')
-        temp = getPreferences('currentFood')
 
         if count == 1:  # 입수처
             relatedIngredient = db.getRelatedIngredient(text)
             if len(relatedIngredient) == 0:
                 if text != '':
-                    self.setStatusBarMessage('%s은(는) 상점에서 판매하지 않습니다.' % text)
+                    self.setStatusBarMessage('%s의 입수처 정보가 없습니다.' % text)
             else:
                 relatedIngredient = relatedIngredient[0] 
                 # title = '입수처 정보'
                 seller = ''
-                for i in range(0, 21):
+                for i in range(0, len(CATEGORIES['npcList'])):
                     if relatedIngredient[i + 4] == 1:
                         seller += CATEGORIES['npcList'][i] + ', '
                 seller = seller[:-2]
-                self.setStatusBarMessage(text + ' ' + str(relatedIngredient[2]) + 'G : ' + seller)
+                cost = relatedIngredient[2]
+
+                if cost == 0:
+                    self.setStatusBarMessage(text + ' - 가격 정보 없음 : ' + seller)
+                else:
+                    self.setStatusBarMessage(text + ' ' + str(relatedIngredient[2]) + 'G : ' + seller)
 
         if count == 2:  # 점프
             relatedRecipe = db.getRelatedRecipe(text)
@@ -652,8 +657,24 @@ class FullWindow(QMainWindow):
                 else:
                     self.stuffNames[i].setStyleSheet('text-decoration: underline;')
 
-        self.eftValue.getWidget().setText('' if special[0] is None else special[0])
-        self.eftValue.getWidget().setToolTip('효과 없음' if special[1] is None else special[1])
+        eftValue = ''
+        eftTooltip = ''
+        divider = int(len(special) / 2)
+
+        for i in range(0, divider):
+            if special[i] is not None:
+                if i == divider - 1:
+                    eftValue += ', %s' % special[i]
+                    eftTooltip += ', %s' % special[i + divider]
+                elif i == 0:
+                    eftValue += '%s' % special[i]
+                    eftTooltip += '%s' % special[i + divider]
+                else:
+                    eftValue += ', %s' % special[i]
+                    eftTooltip += ', %s' % special[i + divider]
+
+        self.eftValue.getWidget().setText(eftValue)
+        self.eftValue.getWidget().setToolTip('효과 없음' if special[0] is None else eftTooltip)
 
         for idx in range(len(statValues)):
             val = stats[idx]
@@ -688,6 +709,8 @@ class FullWindow(QMainWindow):
             self.common.ratioDialog.close()
         if self.common.settingsDialog:
             self.common.settingsDialog.close()
+        if self.common.helpDialog:
+            self.common.helpDialog.close()
 
     # Keyboard listener
     def keyPressEvent(self, event : QEvent) -> None:
@@ -699,7 +722,7 @@ class FullWindow(QMainWindow):
         self.actions['lockRatio'].setText('비율 바 잠금')
         self.actions['changeMode'].setText('모드 변경')
         self.actions['settings'].setText('설정')
-        self.actions['help'].setText('도움말 (공사 중)')
+        self.actions['help'].setText('도움말')
 
         self.ratioBox.setTitle('비율')
         

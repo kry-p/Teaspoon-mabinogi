@@ -5,6 +5,8 @@
 '''
 from PyQt5.QtCore import (QEvent, pyqtSignal, QObject)
 
+from modules.help_dialog import HelpDialog
+
 from .settings_dialog import SettingsDialog
 from .ratio_dialog import RatioDialog
 
@@ -14,14 +16,21 @@ class Common():
             cls._instance = super().__new__(cls)
         return cls._instance   
 
-    def __init__(self) -> None:
+    def __init__(self, resources) -> None:
         self.settingsDialog = None
+        self.helpDialog = None
         self.ratioDialog = None
+        self.resources = resources
 
     def openSettingsDialog(self) -> None:
         if self.settingsDialog is None:
             self.settingsDialog = SettingsDialog()
         self.settingsDialog.show()
+
+    def openHelpDialog(self) -> None:
+        if self.helpDialog is None:
+            self.helpDialog = HelpDialog(self.resources)
+        self.helpDialog.show()
 
     def toggleRatioDialog(self, inputs : list) -> None:
         data = list(map(lambda value: 0 if value.text() ==

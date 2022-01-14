@@ -35,8 +35,8 @@ if __name__ == "__main__":
     global mini
     global full
 
-    mini = MiniWindow(APP_VERSION)
-    full = FullWindow(APP_VERSION)
+    mini = MiniWindow(APP_VERSION, res)
+    full = FullWindow(APP_VERSION, res)
 
     mini.setFullWindow(full)
     full.setMiniWindow(mini)

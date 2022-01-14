@@ -18,7 +18,7 @@ NAME_LABEL_STYLESHEET = 'font-weight: 600;'
 
 # Mini window
 class MiniWindow(QMainWindow):
-    def __init__(self, APP_VERSION : str) -> None:
+    def __init__(self, APP_VERSION : str, resources) -> None:
         super().__init__()
 
         # Settings watcher
@@ -26,7 +26,7 @@ class MiniWindow(QMainWindow):
 
         # Settings for window
         self.APP_VERSION = APP_VERSION
-        self.common = Common()
+        self.common = Common(resources)
         self.setWindowTitle('Spoon %s' % self.APP_VERSION)
         self.resize(190, 190)
         self.setFixedSize(QSize(190, 190))
@@ -49,12 +49,11 @@ class MiniWindow(QMainWindow):
             'settings': Widget(widget = QAction(self),
                                text = "설정"),
             'help': Widget(widget = QAction(self),
-                           text = "도움말 (공사 중)"),
+                           text = "도움말"),
         }
         self.actions['lockRatio'].getWidget().setCheckable(True)
         self.actions['lockRatio'].getWidget().setChecked(
             True if getPreferences('ratioBarLocked') == 'true' else False)
-        self.actions['help'].getWidget().setEnabled(False)
 
         self.toolsMenu.addAction(self.actions['lockRatio'].getWidget())
         self.toolsMenu.addAction(self.actions['changeMode'].getWidget())
@@ -100,6 +99,7 @@ class MiniWindow(QMainWindow):
         self.actions['changeMode'].getWidget().triggered.connect(self.changeMainDialog)
         self.actions['lockRatio'].getWidget().triggered.connect(self.toggleRatioBarLocked)
         self.actions['settings'].getWidget().triggered.connect(self.common.openSettingsDialog)
+        self.actions['help'].getWidget().triggered.connect(self.common.openHelpDialog)
         self.ratioBarButton.getWidget().clicked.connect(lambda : self.common.toggleRatioDialog(self.stuffRatioInputs))
         for item in self.stuffRatioInputs:
             item.textChanged.connect(lambda : self.common.updateRatioDialog(self.stuffRatioInputs))
@@ -129,3 +129,5 @@ class MiniWindow(QMainWindow):
             self.common.ratioDialog.close()
         if self.common.settingsDialog:
             self.common.settingsDialog.close()
+        if self.common.helpDialog:
+            self.common.helpDialog.close()
