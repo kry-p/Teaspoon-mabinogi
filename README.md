@@ -43,6 +43,7 @@ pip install PyQt5
 ## FAQ - ⚠ 문제가 있으면 여기부터 읽어 주세요 ⚠
 
 - Qt platform plugin 문제  
+
   This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
 
   해당 프로그램에 사용된 Qt 프레임워크의 Windows용 DLL 링크가 잘못되어 발생하는 문제입니다.
@@ -61,8 +62,18 @@ pip install PyQt5
   위 조치 후에도 문제가 발생하는 경우 개발자에게 문의해 주세요.
 
 - 설정 백업이나 초기화는 어떻게 하나요?  
+
   `(사용자)/AppData/Local/Yuzu/Spoon` 경로에 `settings.ini` 파일이 있습니다.  
   이 파일을 백업하거나 삭제하시면 됩니다.
+  
+- 프로그램이 왜 이렇게 무겁나요?  
+
+  Python이 무겁습니다. 차후 여유가 있다면 C++로 이식이 이루어질 수 있으나, 언제일지는 아무도 모릅니다.
+  
+- SmartScreen 경고는 왜 뜨나요?  
+
+  실행 파일에 디지털 서명을 하지 않아서입니다. 인증서가 비싸요..  
+  진위 여부가 의심될 경우 릴리즈 노트의 MD5 해시를 확인해 주세요. Windows 10 이상을 사용 중이라면 certutil 명령으로 빠르게 확인할 수 있습니다.
 
 ## QnA
 
@@ -70,10 +81,6 @@ pip install PyQt5
 답변에는 수 일이 소요될 수 있습니다.
 
 질문이나 버그 제보 시에는 구동 환경을 **상세히** 적어 주세요. 충분한 정보가 있을수록 빠른 해결에 도움이 됩니다.
-
-## 🚧 Todos 🚧
-
-- 설정 저장 / 불러오기, 초기화 기능 구현
 
 ## 라이선스
 
