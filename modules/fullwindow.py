@@ -6,8 +6,7 @@
 import math
 import re
 from enum import Enum
-from PyQt5.QtCore import (QCoreApplication, QMetaObject, QRect, QSize,
-                            Qt, QEvent)
+from PyQt5.QtCore import (QMetaObject, QRect, QSize, Qt, QEvent)
 from PyQt5.QtGui import (QStandardItem, QStandardItemModel)
 from PyQt5.QtWidgets import (QComboBox, QGroupBox, QLabel,
                                QListView, QMainWindow, QMenu, QMenuBar,
@@ -360,7 +359,7 @@ class FullWindow(QMainWindow):
                     self.setStatusBarMessage('%s의 입수처 정보가 없습니다.' % text)
             else:
                 relatedIngredient = relatedIngredient[0] 
-                # title = '입수처 정보'
+          
                 seller = ''
                 for i in range(0, len(CATEGORIES['npcList'])):
                     if relatedIngredient[i + 4] == 1:
@@ -718,6 +717,7 @@ class FullWindow(QMainWindow):
             self.searchButton.click()
 
     """ -------- Translations -------- """
+    # const
     def retranslateUi(self) -> None:
         self.actions['lockRatio'].setText('비율 바 잠금')
         self.actions['changeMode'].setText('모드 변경')
@@ -732,23 +732,19 @@ class FullWindow(QMainWindow):
         self.searchButton.setText('검색')
 
         self.infoBox.setTitle('정보')
-        self.eftLabel.setText(QCoreApplication.translate(
-            'Spoon', u'<html><head/><body><p><span style=\' font-weight:600;\'>\ud6a8\uacfc</span></p></body></html>', None))
+        self.eftLabel.setText('효과')
+        self.eftLabel.setStyleSheet(STYLE_BOLD)
 
         self.selectorWidget.setTabText(self.selectorWidget.indexOf(
-            self.recipeListMenu), QCoreApplication.translate('Spoon', u'\ubaa9\ub85d', None))
+            self.recipeListMenu), '목록')
         self.selectorWidget.setTabText(self.selectorWidget.indexOf(
-            self.searchMenu), QCoreApplication.translate('Spoon', u'\uac80\uc0c9', None))
+            self.searchMenu), '검색')
         self.selectorWidget.setTabText(self.selectorWidget.indexOf(
-            self.favoriteMenu), QCoreApplication.translate('Spoon', u'\u2606', None))
+            self.favoriteMenu), u'\u2606')
 
-        self.alignUpButton.setText(
-            QCoreApplication.translate('Spoon', u'\u25b3', None))
-        self.alignDownButton.setText(
-            QCoreApplication.translate('Spoon', u'\u25bd', None))
-        self.favoriteDeleteButton.setText(
-            QCoreApplication.translate('Spoon', u'\uc0ad\uc81c', None))
+        self.alignUpButton.setText(u'\u25b3')
+        self.alignDownButton.setText(u'\u25bd')
+        self.favoriteDeleteButton.setText('삭제')
 
-        self.ratioBarButton.setText(QCoreApplication.translate(
-            'Spoon', u'\ube44\uc728 \ubc14 On / Off', None))
+        self.ratioBarButton.setText('비율 바 On / Off')
         
