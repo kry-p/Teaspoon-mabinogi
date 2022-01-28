@@ -72,7 +72,7 @@ class HelpDialog(QMainWindow):
         self.label_7.setScaledContents(True)
         self.label_7.setObjectName("label_7")
         self.label_9 = QLabel(self.tab_2)
-        self.label_9.setGeometry(QRect(260, 160, 241, 111))
+        self.label_9.setGeometry(QRect(260, 160, 241, 121))
         self.label_9.setObjectName("label_9")
         self.label_8 = QLabel(self.tab_2)
         self.label_8.setGeometry(QRect(260, 20, 231, 131))
@@ -149,6 +149,7 @@ class HelpDialog(QMainWindow):
 "<p style=\" margin-top:0px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:700;\">목록</span> - 랭크별 목록에서 요리 찾기</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:700;\">검색</span> - 이름, 효과, 재료로 요리 검색</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:700;\">☆</span> - 즐겨찾기</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">* 표시된 요리는 히든 재료가 있습니다.</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">목록에서 요리를 <span style=\" font-weight:700;\">더블 클릭</span>하면 추가됩니다.</p></body></html>"))
         self.label_8.setText(_translate("HelpDialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
