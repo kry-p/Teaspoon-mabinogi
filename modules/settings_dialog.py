@@ -70,7 +70,7 @@ class SettingsDialog(QMainWindow):
                                                                             u"<html><head/><body><p><span style=\" font-weight:600; color:#555555;\">\
                                                                             \uac8c\uc784 : </span><span style=\" color:#555555;\">[\ud558\ud504] \
                                                                             \ub0e5\ud14c</span></p><p><span style=\" font-weight:600; color:#555555;\">\
-                                                                            \ub514\ucf54 : </span><span style=\" color:#555555;\">Niente#1438</span></p></body></html>",
+                                                                            \ub514\ucf54 : </span><span style=\" color:#555555;\">niente0109</span></p></body></html>",
                                                                             None))}
         # Inputs for ratio bar
         self.input = {
