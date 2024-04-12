@@ -73,11 +73,18 @@ def resetIncompatibles() -> None:
     
 # Read from QSettings
 def getPreferences(name : str):
-    if preferences.contains(name):
-        return preferences.value(name)
-    else:
-        # If QSettings instance doesn't have specific props
+    try:
+        if preferences.contains(name):
+            return preferences.value(name)
+        else:
+            # If QSettings instance doesn't have specific props
+            preferences.setValue(name, defaultPreferences[name])
+            return defaultPreferences[name]
+    except:
+        preferences.setValue(name, defaultPreferences[name])
         return defaultPreferences[name]
+
+
 
 # Create preferences file
 makeDir(LOCAL_PATH + RELATIVE_PATH)

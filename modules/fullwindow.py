@@ -37,8 +37,10 @@ class FullWindow(QMainWindow):
 
         self.version = version
         self.common = Common(resources)
-        self.currentFood = getPreferences('currentFood')
-        self.favorites = [] if getPreferences('favorites')['item'] is None else getPreferences('favorites')['item']
+        self.currentFood = getPreferences('currentFood') || ""
+        favorites = getPreferences('favorites')
+        # Validates favorites dictionary before use
+        self.favorites = [] if type(favorites) != "<class 'dict'>" or 'item' in favorites == false else getPreferences('favorites')['item']
 
         # Settings watcher
         watcher.fileChanged.connect(self.fileChangeEvent)
@@ -693,9 +695,12 @@ class FullWindow(QMainWindow):
     """ ----------- Events ----------- """
     # If QSettings file has changed
     def fileChangeEvent(self) -> None:
-        # Detects 
-        favorites = getPreferences('favorites')['item']
-        if favorites is not None:
+        # Detects favorite 
+        favorites = getPreferences('favorites')
+        # Validate if favorites setting is valid
+        items = [] if type(favorites) != "<class 'dict'>" or 'item' in favorites == false else getPreferences('favorites')['item']
+
+        if items is not None:
             if len(favorites) == 0:
                 self.favorites = []
                 self.updateFavorite()
