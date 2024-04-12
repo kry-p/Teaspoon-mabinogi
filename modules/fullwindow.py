@@ -37,7 +37,7 @@ class FullWindow(QMainWindow):
 
         self.version = version
         self.common = Common(resources)
-        self.currentFood = getPreferences('currentFood') || ""
+        self.currentFood = getPreferences('currentFood')
         favorites = getPreferences('favorites')
         # Validates favorites dictionary before use
         self.favorites = [] if type(favorites) != "<class 'dict'>" or 'item' in favorites == false else getPreferences('favorites')['item']
