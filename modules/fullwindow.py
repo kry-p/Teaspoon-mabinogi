@@ -40,7 +40,7 @@ class FullWindow(QMainWindow):
         self.currentFood = getPreferences('currentFood')
         favorites = getPreferences('favorites')
         # Validates favorites dictionary before use
-        self.favorites = [] if type(favorites) != "<class 'dict'>" or 'item' in favorites == false else getPreferences('favorites')['item']
+        self.favorites = [] if type(favorites) != ("<class 'dict'>" or 'item') in favorites == false else getPreferences('favorites')['item']
 
         # Settings watcher
         watcher.fileChanged.connect(self.fileChangeEvent)

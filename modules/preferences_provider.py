@@ -8,8 +8,8 @@ from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 from pathlib import Path
 
 # Version
-APP_VERSION : str = 'v1.0.6'
-BUILD_NUMBER : int = 22
+APP_VERSION : str = 'v1.0.7'
+BUILD_NUMBER : int = 23
 
 # Default preferences
 defaultPreferences : dict = { 
