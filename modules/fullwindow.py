@@ -621,6 +621,9 @@ class FullWindow(QMainWindow):
                 trigger(actions[i], i)     
         
     def setFoodInfo(self, foodName : str) -> None:
+        if db.getRank(foodName) == -1:
+            return
+
         statValues = self.statValue + self.chrValue\
                 + self.atkValue + self.defValue
         info = db.getFoodInfo(foodName)
