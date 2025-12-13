@@ -1,6 +1,11 @@
 import os
 
-root = os.path.dirname(__file__)
+import sys
+
+if getattr(sys, 'frozen', False):
+    root = sys._MEIPASS
+else:
+    root = os.path.dirname(__file__)
 icon = os.path.join(root, 'cookie.ico')
 icon_alt = os.path.join(root, 'cookie_alt.ico')
 
