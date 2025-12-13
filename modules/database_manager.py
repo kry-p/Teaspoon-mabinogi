@@ -4,8 +4,9 @@ Database wrapper class for Spoon
 using SQLite
 '''
 import sqlite3
+import res
 
-DB_PATH = './spoon.db'
+DB_PATH = res.db_path
 RECIPE_MILESTONE = {
     'categoryName': ['[1] 저미기', '[2] 수비드', '[3] 발효',
                      '[4] 피자 만들기', '[5] 찌기', '[6] 파이 만들기',
