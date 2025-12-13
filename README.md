@@ -40,6 +40,12 @@ pip install PyQt5
 #### PyInstaller로 빌드
 
 ```pyinstaller``` 를 사용하여 단독 실행 파일로 작성할 수 있습니다. 동봉된 ```Spoon.spec``` 파일을 사용해 주세요.
+자동화된 빌드 스크립트가 프로젝트 루트에 있으니 해당 파일을 사용해도 됩니다.
+
+- build.ps1 : PowerShell 스크립트로 빌드
+- build.bat : cmd 스크립트로 빌드
+
+빌드 스크립트는 Python 3.14에서 테스트되었으며 가상환경 (venv) 기능을 지원하는 Python 버전에서만 실행이 가능합니다.
 
 ## 알려진 문제
 
