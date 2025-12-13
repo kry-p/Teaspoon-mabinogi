@@ -8,8 +8,8 @@ from PyQt5.QtCore import QSettings, QStandardPaths, QFileSystemWatcher
 from pathlib import Path
 
 # Version
-APP_VERSION : str = 'v1.0.5'
-BUILD_NUMBER : int = 21
+APP_VERSION : str = 'v1.0.7'
+BUILD_NUMBER : int = 23
 
 # Default preferences
 defaultPreferences : dict = { 
@@ -73,11 +73,18 @@ def resetIncompatibles() -> None:
     
 # Read from QSettings
 def getPreferences(name : str):
-    if preferences.contains(name):
-        return preferences.value(name)
-    else:
-        # If QSettings instance doesn't have specific props
+    try:
+        if preferences.contains(name):
+            return preferences.value(name)
+        else:
+            # If QSettings instance doesn't have specific props
+            preferences.setValue(name, defaultPreferences[name])
+            return defaultPreferences[name]
+    except:
+        preferences.setValue(name, defaultPreferences[name])
         return defaultPreferences[name]
+
+
 
 # Create preferences file
 makeDir(LOCAL_PATH + RELATIVE_PATH)
